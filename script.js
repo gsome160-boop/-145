@@ -5,6 +5,23 @@ const quranContainer = document.getElementById('quran-container');
 const searchInput = document.getElementById('search-input');
 const suggestionsList = document.getElementById('suggestions');
 
+// إضافة تنسيق القائمة عبر الجافاسكريبت لضمان ظهورها
+if (suggestionsList) {
+    suggestionsList.style.position = 'absolute';
+    suggestionsList.style.backgroundColor = '#ffffff';
+    suggestionsList.style.border = '2px solid #1a5235';
+    suggestionsList.style.borderRadius = '4px';
+    suggestionsList.style.maxHeight = '250px';
+    suggestionsList.style.overflowY = 'auto';
+    suggestionsList.style.zIndex = '99999';
+    suggestionsList.style.width = '100%';
+    suggestionsList.style.padding = '0';
+    suggestionsList.style.margin = '5px 0 0 0';
+    suggestionsList.style.listStyle = 'none';
+    suggestionsList.style.boxShadow = '0px 4px 10px rgba(0,0,0,0.2)';
+    suggestionsList.style.display = 'none';
+}
+
 let allSurahs = []; 
 
 // 1. جلب قائمة السور وتعبئتها في القائمة المنسدلة
@@ -53,7 +70,17 @@ function updateAudio() {
         .catch(error => console.error('خطأ في جلب نص السورة:', error));
 }
 
-// 3. ميزة الاقتراحات والبحث الذكي مع التشغيل التلقائي فور الضغط
+// دالة ذكية لتنظيف النص من الحركات والتشكيل والهمزات لسهولة البحث العادي
+function cleanArabicText(text) {
+    if (!text) return "";
+    return text
+        .replace(/[\u064B-\u065F]/g, "") // إزالة جميع الحركات والتشكيل (الضمة، الفتحة، الكسرة، السكون، الشدة، التنوين)
+        .replace(/[أإآا]/g, "ا")         // توحيد الألفات
+        .replace(/ة/g, "ه")             // توحيد التاء المربوطة والهاء
+        .replace(/ى/g, "ي");            // توحيد الألف المقصورة والياء
+}
+
+// 3. ميزة الاقتراحات والبحث الذكي بدون حركات
 searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
     suggestionsList.innerHTML = '';
@@ -70,6 +97,7 @@ searchInput.addEventListener('input', (e) => {
             suggestionsList.style.display = 'block';
             const li = document.createElement('li');
             li.textContent = `📖 الانتقال إلى الصفحة رقم ${pageNumber}`;
+            styleListItem(li);
             
             li.addEventListener('click', () => {
                 fetch(`https://api.alquran.cloud/v1/page/${pageNumber}/ar.alafasy`)
@@ -89,10 +117,10 @@ searchInput.addEventListener('input', (e) => {
         return;
     }
 
-    // ب) إذا كان البحث بنص (اسم السورة)
-    const cleanQuery = query.replace(/[أإآا]/g, 'ا').replace(/ة/g, 'ه');
+    // ب) إذا كان البحث بنص (اسم السورة بدون حركات)
+    const cleanQuery = cleanArabicText(query);
     const matches = allSurahs.filter(surah => {
-        const cleanSurahName = surah.name.replace(/[أإآا]/g, 'ا').replace(/ة/g, 'ه');
+        const cleanSurahName = cleanArabicText(surah.name);
         return cleanSurahName.includes(cleanQuery);
     });
 
@@ -101,6 +129,7 @@ searchInput.addEventListener('input', (e) => {
         matches.forEach(surah => {
             const li = document.createElement('li');
             li.textContent = `🕌 سورة ${surah.name} (رقم ${surah.number})`;
+            styleListItem(li);
             
             li.addEventListener('click', () => {
                 surahSelect.value = surah.number;
@@ -114,6 +143,27 @@ searchInput.addEventListener('input', (e) => {
         suggestionsList.style.display = 'none';
     }
 });
+
+// تنسيق عناصر القائمة
+function styleListItem(li) {
+    li.style.padding = '12px';
+    li.style.cursor = 'pointer';
+    li.style.borderBottom = '1px solid #eeeeee';
+    li.style.backgroundColor = '#ffffff';
+    li.style.color = '#222222';
+    li.style.textAlign = 'right';
+    li.style.fontSize = '16px';
+    li.style.fontWeight = 'bold';
+    
+    li.addEventListener('mouseenter', () => {
+        li.style.backgroundColor = '#d4edda';
+        li.style.color = '#1a5235';
+    });
+    li.addEventListener('mouseleave', () => {
+        li.style.backgroundColor = '#ffffff';
+        li.style.color = '#222222';
+    });
+}
 
 // إغلاق قائمة الاقتراحات عند الضغط في أي مكان خارجها
 document.addEventListener('click', (e) => {
