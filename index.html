@@ -5,20 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>موقع احمد البشرى / الاب / الابن لتعليم القران الكريم وعلومه الشرعية</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* أنيميشن الشاشة الترحيبية */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a5235;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            animation: fadeOut 1.5s ease-in-out 2.5s forwards;
+        }
+        .intro-text {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        /* تنسيق قائمة الاقتراحات لضمان ظهورها فوق كل شيء */
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .suggestions-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff !important;
+            border: 2px solid #1a5235 !important;
+            border-radius: 4px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 9999999 !important;
+            padding: 0;
+            margin: 5px 0 0 0;
+            list-style: none;
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+            display: none;
+        }
+        .suggestions-box li {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eeeeee;
+            text-align: right;
+            color: #222222 !important;
+            font-size: 16px;
+            font-weight: bold;
+            background: #ffffff !important;
+        }
+        .suggestions-box li:hover {
+            background-color: #d4edda !important;
+            color: #1a5235 !important;
+        }
+    </style>
 </head>
 <body>
+
+    <div id="intro-overlay">
+        <div class="intro-text">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <div class="intro-text" style="animation-delay: 1.2s;">"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</div>
+    </div>
 
     <div class="container">
         <h1>موقع احمد البشرى / الاب / الابن لتعليم القران الكريم وعلومه الشرعية</h1>
         
         <div class="controls">
-            <!-- خانة البحث -->
             <div class="control-group" style="width: 100%; margin-bottom: 15px;">
                 <label for="search-input">ابحث باسم السورة أو رقم الصفحة:</label>
-                <input type="text" id="search-input" placeholder="مثال: البقرة، أو اكتب رقم الصفحة مثل: 2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" autocomplete="off" placeholder="مثال: البقرة، أو اكتب رقم الصفحة مثل: 2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
+                    <ul id="suggestions" class="suggestions-box"></ul>
+                </div>
             </div>
 
-            <!-- قائمة اختيار السورة -->
             <div class="control-group">
                 <label for="surah-select">اختر السورة:</label>
                 <select id="surah-select">
@@ -26,7 +102,6 @@
                 </select>
             </div>
 
-            <!-- قائمة القراء -->
             <div class="control-group">
                 <label for="reciter-select">اختر القارئ للاستماع:</label>
                 <select id="reciter-select">
@@ -36,12 +111,10 @@
             </div>
         </div>
 
-        <!-- مشغل الصوتيات -->
         <div class="audio-player">
             <audio id="main-audio" controls></audio>
         </div>
 
-        <!-- مكان عرض الآيات -->
         <div id="quran-container" class="quran-text"></div>
     </div>
 
