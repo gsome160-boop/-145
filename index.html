@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقع احمد البشرى / الاب / الابن لتعليم القران الكريم وعلومه الشرعية</title>
+    <title>موقع احمد البشرى لعلوم القرآن الكريم</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* أنيميشن الشاشة الترحيبية */
@@ -31,17 +31,92 @@
             transform: translateY(20px);
             animation: fadeInUp 1s ease-out 0.5s forwards;
         }
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+        /* تنسيق قوائم التبويب (Tabs) */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eeeeee;
+            padding-bottom: 10px;
         }
-        @keyframes fadeOut {
-            to { opacity: 0; visibility: hidden; }
+        .tab-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #1a5235;
+            background-color: #ffffff;
+            color: #1a5235;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background-color: #1a5235;
+            color: #ffffff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
         }
 
         /* حاوية البحث لترتيب القائمة المنسدلة */
         .search-wrapper {
             position: relative;
             width: 100%;
+        }
+
+        /* تنسيق خاص بقسم التسبيح */
+        .tasbeeh-card {
+            background: #f9f9f9;
+            border: 2px solid #1a5235;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .tasbeeh-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a5235;
+            margin-bottom: 15px;
+        }
+        .counter-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #222222;
+            margin-bottom: 15px;
+            font-family: monospace;
+        }
+        .tasbeeh-btn {
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+        }
+        .btn-count { background-color: #1a5235; color: white; width: 60%; font-size: 20px; }
+        .btn-reset { background-color: #d9534f; color: white; }
+
+        /* تنسيق مصحف القراءة ليكون مريحاً للعين */
+        .quran-read-box {
+            background: #fffdf5;
+            border: 1px solid #e6dfc3;
+            padding: 25px;
+            border-radius: 8px;
+            line-height: 2.2;
+            font-size: 24px;
+            text-align: justify;
+            color: #222222;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
         }
     </style>
 </head>
@@ -54,43 +129,85 @@
     </div>
 
     <div class="container">
-        <h1>موقع احمد البشرى / الاب / الابن لتعليم القران الكريم وعلومه الشرعية</h1>
+        <h1>موقع احمد البشرى لعلوم القرآن الكريم</h1>
         
-        <div class="controls">
-            <!-- خانة البحث وقائمة خياراتها -->
-            <div class="control-group" style="width: 100%; margin-bottom: 15px;">
-                <label for="search-input">ابحث باسم السورة أو رقم الصفحة:</label>
-                <div class="search-wrapper">
-                    <input type="text" id="search-input" autocomplete="off" placeholder="مثال: البقرة، أو اكتب رقم الصفحة مثل: 2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
-                    <ul id="suggestions"></ul>
+        <!-- أزرار القوائم الرئيسية (Tabs) -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('listen-tab')">🎧 قائمة الاستماع</button>
+            <button class="tab-btn" onclick="switchTab('read-tab')">📖 قائمة القراءة</button>
+            <button class="tab-btn" onclick="switchTab('tasbeeh-tab')">📿 قائمة التسبيح</button>
+        </div>
+
+        <!-- 1. قائمة الاستماع -->
+        <div id="listen-tab" class="tab-content active">
+            <div class="controls">
+                <div class="control-group" style="width: 100%; margin-bottom: 15px;">
+                    <label for="search-input">ابحث باسم السورة أو رقم الصفحة:</label>
+                    <div class="search-wrapper">
+                        <input type="text" id="search-input" autocomplete="off" placeholder="مثال: البقرة، أو اكتب رقم الصفحة مثل: 2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
+                        <ul id="suggestions"></ul>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="surah-select">اختر السورة:</label>
+                    <select id="surah-select">
+                        <option value="">-- اضغط هنا لاختيار السورة --</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="reciter-select">اختر القارئ للاستماع:</label>
+                    <select id="reciter-select">
+                        <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
+                        <option value="https://server13.mp3quran.net/husr/">محمود خليل الحصري</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- قائمة اختيار السورة -->
-            <div class="control-group">
-                <label for="surah-select">اختر السورة:</label>
-                <select id="surah-select">
-                    <option value="">-- اضغط هنا لاختيار السورة --</option>
-                </select>
+            <div class="audio-player">
+                <audio id="main-audio" controls></audio>
+            </div>
+            <div id="quran-container" class="quran-text"></div>
+        </div>
+
+        <!-- 2. قائمة القراءة -->
+        <div id="read-tab" class="tab-content">
+            <div class="controls">
+                <div class="control-group" style="width: 100%;">
+                    <label for="surah-read-select">اختر السورة لقراءتها:</label>
+                    <select id="surah-read-select" style="width: 100%; padding: 10px;">
+                        <option value="">-- اختر السورة --</option>
+                    </select>
+                </div>
+            </div>
+            <div id="quran-read-container" class="quran-read-box" style="margin-top: 20px;">الرجاء اختيار سورة لبدء القراءة...</div>
+        </div>
+
+        <!-- 3. قائمة التسبيح -->
+        <div id="tasbeeh-tab" class="tab-content">
+            <div class="controls">
+                <div class="control-group" style="width: 100%;">
+                    <label for="zikr-select">اختر الذكر / التسبيح:</label>
+                    <select id="zikr-select" style="width: 100%; padding: 10px;" onchange="changeZikr()">
+                        <option value="سبحان الله وبحمده، سبحان الله العظيم">سبحان الله وبحمده، سبحان الله العظيم</option>
+                        <option value="الحمد لله حمداً كثيراً طيباً مباركاً فيه">الحمد لله</option>
+                        <option value="لا إله إلا الله وحده لا شريك له">لا إله إلا الله</option>
+                        <option value="الله أكبر كبيراً، والحمد لله كثيراً">الله أكبر</option>
+                        <option value="أستغفر الله العظيم وأتوب إليه">استغفار</option>
+                        <option value="اللهم صلّ وسلم على نبينا محمد">الصلاة على النبي</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- قائمة القراء -->
-            <div class="control-group">
-                <label for="reciter-select">اختر القارئ للاستماع:</label>
-                <select id="reciter-select">
-                    <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
-                    <option value="https://server13.mp3quran.net/husr/">محمود خليل الحصري</option>
-                </select>
+            <div class="tasbeeh-card">
+                <div id="zikr-text" class="tasbeeh-text">سبحان الله وبحمده، سبحان الله العظيم</div>
+                <div id="counter-val" class="counter-display">0</div>
+                <button class="tasbeeh-btn btn-count" onclick="incrementCounter()">اضغط للتسبيح</button>
+                <button class="tasbeeh-btn btn-reset" onclick="resetCounter()">تصفير</button>
             </div>
         </div>
 
-        <!-- مشغل الصوتيات للموقع -->
-        <div class="audio-player">
-            <audio id="main-audio" controls></audio>
-        </div>
-
-        <!-- مكان عرض الآيات -->
-        <div id="quran-container" class="quran-text"></div>
     </div>
 
     <script src="script.js"></script>
