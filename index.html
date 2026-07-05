@@ -7,30 +7,20 @@
     <style>
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; text-align: center; }
         .hidden { display: none !important; }
-        
-        /* شاشات البداية */
-        #intro-overlay, #lang-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #1a5235; color: #fff; }
-        #lang-overlay { background: #fff; color: #1a5235; }
+        #lang-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; }
         .lang-btn { padding: 15px 30px; margin: 10px; font-size: 20px; cursor: pointer; background: #1a5235; color: #fff; border: none; border-radius: 10px; }
-        
-        /* التبويبات */
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #ddd; }
         .tab-btn.active { background: #1a5235; color: #fff; }
         .content { display: none; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .content.active { display: block; }
-        
-        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        .quran-text { line-height: 2; font-size: 22px; text-align: justify; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="intro-overlay" style="animation: fadeOut 1.5s ease-in-out 2s forwards;">
-        <h2>"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</h2>
-    </div>
-
-    <div id="lang-overlay" class="hidden">
-        <h2 id="lang-header">اختر اللغة / Select Language</h2>
+    <div id="lang-overlay">
+        <h2>اختر اللغة / Select Language</h2>
         <button class="lang-btn" onclick="setLanguage('ar')">العربية</button>
         <button class="lang-btn" onclick="setLanguage('en')">English</button>
     </div>
@@ -45,13 +35,20 @@
         </div>
 
         <div id="listen" class="content active">
-            <select id="surah-select" style="width: 80%; padding: 10px;"></select>
+            <input type="text" id="search-listen" placeholder="ابحث عن سورة..." oninput="filterSurahs('search-listen', 'surah-select')">
+            <select id="surah-select" onchange="playSurah()"></select>
+            <select id="reciter-select" onchange="playSurah()">
+                <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
+                <option value="https://server13.mp3quran.net/husr/">الحصري</option>
+            </select>
             <br><br>
             <audio id="audio" controls></audio>
         </div>
 
         <div id="read" class="content">
-            <p>قسم قراءة القرآن الكريم</p>
+            <input type="text" id="search-read" placeholder="ابحث عن سورة للقراءة..." oninput="filterSurahs('search-read', 'surah-read-select')">
+            <select id="surah-read-select" onchange="loadReadSurah()"></select>
+            <div id="quran-container" class="quran-text"></div>
         </div>
 
         <div id="tasbeeh" class="content">
@@ -61,17 +58,37 @@
     </div>
 
     <script>
-        // إظهار اختيار اللغة
-        setTimeout(() => { document.getElementById('lang-overlay').classList.remove('hidden'); }, 3500);
+        let allSurahs = [];
+        
+        fetch('https://api.alquran.cloud/v1/surah').then(res => res.json()).then(data => {
+            allSurahs = data.data;
+            populateSelect('surah-select');
+            populateSelect('surah-read-select');
+        });
 
         function setLanguage(lang) {
             document.getElementById('lang-overlay').classList.add('hidden');
             document.getElementById('main-content').classList.remove('hidden');
-            if(lang === 'en') {
-                document.documentElement.dir = 'ltr';
-                document.getElementById('main-title').innerText = 'Holy Quran Website';
-                document.getElementById('lang-header').innerText = 'Select Language';
-            }
+        }
+
+        function populateSelect(id) {
+            const select = document.getElementById(id);
+            allSurahs.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.number;
+                opt.text = s.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function filterSurahs(inputId, selectId) {
+            const query = document.getElementById(inputId).value;
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            allSurahs.filter(s => s.name.includes(query)).forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.number; opt.text = s.name; select.appendChild(opt);
+            });
         }
 
         function showTab(id) {
@@ -81,20 +98,21 @@
             event.currentTarget.classList.add('active');
         }
 
+        function playSurah() {
+            const num = document.getElementById('surah-select').value.padStart(3, '0');
+            const reciter = document.getElementById('reciter-select').value;
+            document.getElementById('audio').src = reciter + num + '.mp3';
+        }
+
+        function loadReadSurah() {
+            const num = document.getElementById('surah-read-select').value;
+            fetch(`https://api.alquran.cloud/v1/surah/${num}/ar.alafasy`).then(res => res.json()).then(data => {
+                document.getElementById('quran-container').innerHTML = data.data.ayahs.map(a => a.text).join(' - ');
+            });
+        }
+
         let c = 0;
         function count() { c++; document.getElementById('counter').innerText = c; }
-
-        fetch('https://api.alquran.cloud/v1/surah')
-            .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById('surah-select');
-                data.data.forEach(s => {
-                    let opt = document.createElement('option');
-                    opt.value = s.number;
-                    opt.text = s.name;
-                    select.appendChild(opt);
-                });
-            });
     </script>
 </body>
 </html>
