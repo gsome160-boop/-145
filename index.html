@@ -3,213 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقع احمد البشرى لعلوم القرآن الكريم</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Quran App</title>
     <style>
-        /* أنيميشن الشاشة الترحيبية */
-        #intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #1a5235;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 999999;
-            animation: fadeOut 1.5s ease-in-out 2.5s forwards;
-        }
-        .intro-text {
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-            margin: 10px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s ease-out 0.5s forwards;
-        }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; text-align: center; }
+        .hidden { display: none !important; }
+        
+        /* شاشات البداية */
+        #intro-overlay, #lang-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #1a5235; color: #fff; }
+        #lang-overlay { background: #fff; color: #1a5235; }
+        .lang-btn { padding: 15px 30px; margin: 10px; font-size: 20px; cursor: pointer; background: #1a5235; color: #fff; border: none; border-radius: 10px; }
+        
+        /* التبويبات */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #ddd; }
+        .tab-btn.active { background: #1a5235; color: #fff; }
+        .content { display: none; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .content.active { display: block; }
+        
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
-
-        /* تنسيق قوائم التبويب (Tabs) */
-        .tabs-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eeeeee;
-            padding-bottom: 10px;
-        }
-        .tab-btn {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 2px solid #1a5235;
-            background-color: #ffffff;
-            color: #1a5235;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-        .tab-btn.active, .tab-btn:hover {
-            background-color: #1a5235;
-            color: #ffffff;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-
-        /* حاوية البحث لترتيب القائمة المنسدلة */
-        .search-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        /* تنسيق خاص بقسم التسبيح */
-        .tasbeeh-card {
-            background: #f9f9f9;
-            border: 2px solid #1a5235;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .tasbeeh-text {
-            font-size: 22px;
-            font-weight: bold;
-            color: #1a5235;
-            margin-bottom: 15px;
-        }
-        .counter-display {
-            font-size: 48px;
-            font-weight: bold;
-            color: #222222;
-            margin-bottom: 15px;
-            font-family: monospace;
-        }
-        .tasbeeh-btn {
-            padding: 10px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            margin: 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px;
-        }
-        .btn-count { background-color: #1a5235; color: white; width: 60%; font-size: 20px; }
-        .btn-reset { background-color: #d9534f; color: white; }
-
-        /* تنسيق مصحف القراءة ليكون مريحاً للعين */
-        .quran-read-box {
-            background: #fffdf5;
-            border: 1px solid #e6dfc3;
-            padding: 25px;
-            border-radius: 8px;
-            line-height: 2.2;
-            font-size: 24px;
-            text-align: justify;
-            color: #222222;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-        }
     </style>
 </head>
 <body>
 
-    <!-- الشاشة الترحيبية -->
-    <div id="intro-overlay">
-        <div class="intro-text">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-        <div class="intro-text" style="animation-delay: 1.2s;">"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</div>
+    <div id="intro-overlay" style="animation: fadeOut 1.5s ease-in-out 2s forwards;">
+        <h2>"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</h2>
     </div>
 
-    <div class="container">
-        <h1>موقع احمد البشرى لعلوم القرآن الكريم</h1>
+    <div id="lang-overlay" class="hidden">
+        <h2 id="lang-header">اختر اللغة / Select Language</h2>
+        <button class="lang-btn" onclick="setLanguage('ar')">العربية</button>
+        <button class="lang-btn" onclick="setLanguage('en')">English</button>
+    </div>
+
+    <div id="main-content" class="hidden">
+        <h1 id="main-title">موقع القرآن الكريم</h1>
         
-        <!-- أزرار القوائم الرئيسية (Tabs) -->
-        <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('listen-tab')">🎧 قائمة الاستماع</button>
-            <button class="tab-btn" onclick="switchTab('read-tab')">📖 قائمة القراءة</button>
-            <button class="tab-btn" onclick="switchTab('tasbeeh-tab')">📿 قائمة التسبيح</button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('listen')">استماع</button>
+            <button class="tab-btn" onclick="showTab('read')">قراءة</button>
+            <button class="tab-btn" onclick="showTab('tasbeeh')">تسبيح</button>
         </div>
 
-        <!-- 1. قائمة الاستماع -->
-        <div id="listen-tab" class="tab-content active">
-            <div class="controls">
-                <div class="control-group" style="width: 100%; margin-bottom: 15px;">
-                    <label for="search-input">ابحث باسم السورة أو رقم الصفحة:</label>
-                    <div class="search-wrapper">
-                        <input type="text" id="search-input" autocomplete="off" placeholder="مثال: البقرة، أو اكتب رقم الصفحة مثل: 2" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;">
-                        <ul id="suggestions"></ul>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label for="surah-select">اختر السورة:</label>
-                    <select id="surah-select">
-                        <option value="">-- اضغط هنا لاختيار السورة --</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label for="reciter-select">اختر القارئ للاستماع:</label>
-                    <select id="reciter-select">
-                        <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
-                        <option value="https://server13.mp3quran.net/husr/">محمود خليل الحصري</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="audio-player">
-                <audio id="main-audio" controls></audio>
-            </div>
-            <div id="quran-container" class="quran-text"></div>
+        <div id="listen" class="content active">
+            <select id="surah-select" style="width: 80%; padding: 10px;"></select>
+            <br><br>
+            <audio id="audio" controls></audio>
         </div>
 
-        <!-- 2. قائمة القراءة -->
-        <div id="read-tab" class="tab-content">
-            <div class="controls">
-                <div class="control-group" style="width: 100%;">
-                    <label for="surah-read-select">اختر السورة لقراءتها:</label>
-                    <select id="surah-read-select" style="width: 100%; padding: 10px;">
-                        <option value="">-- اختر السورة --</option>
-                    </select>
-                </div>
-            </div>
-            <div id="quran-read-container" class="quran-read-box" style="margin-top: 20px;">الرجاء اختيار سورة لبدء القراءة...</div>
+        <div id="read" class="content">
+            <p>قسم قراءة القرآن الكريم</p>
         </div>
 
-        <!-- 3. قائمة التسبيح -->
-        <div id="tasbeeh-tab" class="tab-content">
-            <div class="controls">
-                <div class="control-group" style="width: 100%;">
-                    <label for="zikr-select">اختر الذكر / التسبيح:</label>
-                    <select id="zikr-select" style="width: 100%; padding: 10px;" onchange="changeZikr()">
-                        <option value="سبحان الله وبحمده، سبحان الله العظيم">سبحان الله وبحمده، سبحان الله العظيم</option>
-                        <option value="الحمد لله حمداً كثيراً طيباً مباركاً فيه">الحمد لله</option>
-                        <option value="لا إله إلا الله وحده لا شريك له">لا إله إلا الله</option>
-                        <option value="الله أكبر كبيراً، والحمد لله كثيراً">الله أكبر</option>
-                        <option value="أستغفر الله العظيم وأتوب إليه">استغفار</option>
-                        <option value="اللهم صلّ وسلم على نبينا محمد">الصلاة على النبي</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="tasbeeh-card">
-                <div id="zikr-text" class="tasbeeh-text">سبحان الله وبحمده، سبحان الله العظيم</div>
-                <div id="counter-val" class="counter-display">0</div>
-                <button class="tasbeeh-btn btn-count" onclick="incrementCounter()">اضغط للتسبيح</button>
-                <button class="tasbeeh-btn btn-reset" onclick="resetCounter()">تصفير</button>
-            </div>
+        <div id="tasbeeh" class="content">
+            <h2 id="counter">0</h2>
+            <button onclick="count()" style="padding: 15px 30px; font-size: 18px; cursor: pointer;">اضغط للتسبيح</button>
         </div>
-
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // إظهار اختيار اللغة
+        setTimeout(() => { document.getElementById('lang-overlay').classList.remove('hidden'); }, 3500);
+
+        function setLanguage(lang) {
+            document.getElementById('lang-overlay').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            if(lang === 'en') {
+                document.documentElement.dir = 'ltr';
+                document.getElementById('main-title').innerText = 'Holy Quran Website';
+                document.getElementById('lang-header').innerText = 'Select Language';
+            }
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        let c = 0;
+        function count() { c++; document.getElementById('counter').innerText = c; }
+
+        fetch('https://api.alquran.cloud/v1/surah')
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById('surah-select');
+                data.data.forEach(s => {
+                    let opt = document.createElement('option');
+                    opt.value = s.number;
+                    opt.text = s.name;
+                    select.appendChild(opt);
+                });
+            });
+    </script>
 </body>
 </html>
