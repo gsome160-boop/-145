@@ -3,81 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quran App</title>
+    <title>تطبيق القرآن الكريم</title>
     <style>
         body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; text-align: center; }
-        .hidden { display: none !important; }
-        #lang-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; }
-        .lang-btn { padding: 15px 30px; margin: 10px; font-size: 20px; cursor: pointer; background: #1a5235; color: #fff; border: none; border-radius: 10px; }
+        .header-box { background: #1a5235; color: #fff; padding: 30px; border-radius: 15px; margin-bottom: 20px; }
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #ddd; }
         .tab-btn.active { background: #1a5235; color: #fff; }
         .content { display: none; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .content.active { display: block; }
-        .quran-text { line-height: 2; font-size: 22px; text-align: justify; padding: 20px; }
+        select, input { padding: 10px; margin: 5px; width: 80%; }
+        .quran-text { line-height: 2.2; font-size: 24px; text-align: justify; padding: 20px; }
+        .footer { margin-top: 20px; font-size: 14px; color: #666; }
     </style>
 </head>
 <body>
 
-    <div id="lang-overlay">
-        <h2>اختر اللغة / Select Language</h2>
-        <button class="lang-btn" onclick="setLanguage('ar')">العربية</button>
-        <button class="lang-btn" onclick="setLanguage('en')">English</button>
+    <div class="header-box">
+        <h1>"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</h1>
+        <p>أحمد، البشرى، الأب والابن</p>
     </div>
 
-    <div id="main-content" class="hidden">
-        <h1 id="main-title">موقع القرآن الكريم</h1>
-        
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('listen')">استماع</button>
-            <button class="tab-btn" onclick="showTab('read')">قراءة</button>
-            <button class="tab-btn" onclick="showTab('tasbeeh')">تسبيح</button>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('listen')">الاستماع</button>
+        <button class="tab-btn" onclick="showTab('read')">القراءة</button>
+        <button class="tab-btn" onclick="showTab('tasbeeh')">التسبيح</button>
+    </div>
 
-        <div id="listen" class="content active">
-            <input type="text" id="search-listen" placeholder="ابحث عن سورة..." oninput="filterSurahs('search-listen', 'surah-select')">
-            <select id="surah-select" onchange="playSurah()"></select>
-            <select id="reciter-select" onchange="playSurah()">
-                <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
-                <option value="https://server13.mp3quran.net/husr/">الحصري</option>
-            </select>
-            <br><br>
-            <audio id="audio" controls></audio>
-        </div>
+    <!-- الاستماع -->
+    <div id="listen" class="content active">
+        <h3>قسم الاستماع</h3>
+        <input type="text" id="search-listen" placeholder="ابحث عن اسم السورة..." oninput="filterSurahs('search-listen', 'surah-select')">
+        <select id="surah-select" onchange="playSurah()"></select>
+        <select id="reciter-select" onchange="playSurah()">
+            <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
+            <option value="https://server13.mp3quran.net/husr/">الحصري</option>
+        </select>
+        <audio id="audio" controls style="display:block; width:100%; margin-top:10px;"></audio>
+    </div>
 
-        <div id="read" class="content">
-            <input type="text" id="search-read" placeholder="ابحث عن سورة للقراءة..." oninput="filterSurahs('search-read', 'surah-read-select')">
-            <select id="surah-read-select" onchange="loadReadSurah()"></select>
-            <div id="quran-container" class="quran-text"></div>
-        </div>
+    <!-- القراءة -->
+    <div id="read" class="content">
+        <h3>قسم القراءة</h3>
+        <input type="text" id="search-read" placeholder="ابحث عن اسم السورة..." oninput="filterSurahs('search-read', 'surah-read-select')">
+        <select id="surah-read-select" onchange="loadReadSurah()"></select>
+        <div id="quran-container" class="quran-text"></div>
+    </div>
 
-        <div id="tasbeeh" class="content">
-            <h2 id="counter">0</h2>
-            <button onclick="count()" style="padding: 15px 30px; font-size: 18px; cursor: pointer;">اضغط للتسبيح</button>
-        </div>
+    <!-- التسبيح -->
+    <div id="tasbeeh" class="content">
+        <h2 id="counter">0</h2>
+        <button onclick="count()" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background:#1a5235; color:white; border:none; border-radius:5px;">اضغط للتسبيح</button>
+    </div>
+
+    <div class="footer">
+        <p>من تصميم المبرمج: أبوالقاسم</p>
     </div>
 
     <script>
         let allSurahs = [];
-        
         fetch('https://api.alquran.cloud/v1/surah').then(res => res.json()).then(data => {
             allSurahs = data.data;
             populateSelect('surah-select');
             populateSelect('surah-read-select');
         });
 
-        function setLanguage(lang) {
-            document.getElementById('lang-overlay').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-        }
-
         function populateSelect(id) {
             const select = document.getElementById(id);
             allSurahs.forEach(s => {
                 let opt = document.createElement('option');
-                opt.value = s.number;
-                opt.text = s.name;
-                select.appendChild(opt);
+                opt.value = s.number; opt.text = s.name; select.appendChild(opt);
             });
         }
 
@@ -107,7 +102,7 @@
         function loadReadSurah() {
             const num = document.getElementById('surah-read-select').value;
             fetch(`https://api.alquran.cloud/v1/surah/${num}/ar.alafasy`).then(res => res.json()).then(data => {
-                document.getElementById('quran-container').innerHTML = data.data.ayahs.map(a => a.text).join(' - ');
+                document.getElementById('quran-container').innerHTML = data.data.ayahs.map(a => a.text + ' ﴿' + a.numberInSurah + '﴾').join(' ');
             });
         }
 
