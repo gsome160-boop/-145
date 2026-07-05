@@ -5,7 +5,7 @@ const quranContainer = document.getElementById('quran-container');
 const searchInput = document.getElementById('search-input');
 const suggestionsList = document.getElementById('suggestions');
 
-// إضافة تنسيق القائمة عبر الجافاسكريبت لضمان ظهورها
+// تنسيق القائمة لضمان ظهورها بشكل صحيح
 if (suggestionsList) {
     suggestionsList.style.position = 'absolute';
     suggestionsList.style.backgroundColor = '#ffffff';
@@ -70,17 +70,18 @@ function updateAudio() {
         .catch(error => console.error('خطأ في جلب نص السورة:', error));
 }
 
-// دالة ذكية لتنظيف النص من الحركات والتشكيل والهمزات لسهولة البحث العادي
+// دالة شاملة وقوية لتنظيف النص تماماً من أي تشكيل أو حركات أو زخارف قرآنية
 function cleanArabicText(text) {
     if (!text) return "";
     return text
-        .replace(/[\u064B-\u065F]/g, "") // إزالة جميع الحركات والتشكيل (الضمة، الفتحة، الكسرة، السكون، الشدة، التنوين)
-        .replace(/[أإآا]/g, "ا")         // توحيد الألفات
-        .replace(/ة/g, "ه")             // توحيد التاء المربوطة والهاء
-        .replace(/ى/g, "ي");            // توحيد الألف المقصورة والياء
+        .replace(/[\u064B-\u065F\u0670]/g, "") // إزالة التشكيل بالكامل بما فيها الخنجرية
+        .replace(/[أإآا]/g, "ا")             // توحيد الألف
+        .replace(/ة/g, "ه")                 // توحيد التاء المربوطة
+        .replace(/ى/g, "ي")                 // توحيد الألف المقصورة والياء
+        .replace(/عبد\s+/g, "عبد");         // معالجة المسافات في الأسماء مثل عبد الرحمن
 }
 
-// 3. ميزة الاقتراحات والبحث الذكي بدون حركات
+// 3. ميزة الاقتراحات والبحث الذكي بدون حركات وبشكل مرن
 searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
     suggestionsList.innerHTML = '';
@@ -117,7 +118,7 @@ searchInput.addEventListener('input', (e) => {
         return;
     }
 
-    // ب) إذا كان البحث بنص (اسم السورة بدون حركات)
+    // ب) إذا كان البحث بنص (اسم السورة المكتوب عادي)
     const cleanQuery = cleanArabicText(query);
     const matches = allSurahs.filter(surah => {
         const cleanSurahName = cleanArabicText(surah.name);
@@ -165,7 +166,7 @@ function styleListItem(li) {
     });
 }
 
-// إغلاق قائمة الاقتراحات عند الضغط في أي مكان خارجها
+// إغلاق قائمة الاقتراحات عند الضغط خارجها
 document.addEventListener('click', (e) => {
     if (e.target !== searchInput) {
         suggestionsList.style.display = 'none';
