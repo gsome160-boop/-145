@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع احمد البشرى / الاب / الابن لتعليم القران الكريم وعلومه الشرعية</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>موقع احمد البشرى / الاب / الابن لتعليم القران الكريم وعلومه الشرعية</h1>
+        
+        <div class="controls">
+            <!-- قائمة اختيار السورة -->
+            <div class="control-group">
+                <label for="surah-select">اختر السورة:</label>
+                <select id="surah-select">
+                    <option value="">-- اضغط هنا لاختيار السورة --</option>
+                </select>
+            </div>
+
+            <!-- قائمة القراء (ياسر والحصري فقط) -->
+            <div class="control-group">
+                <label for="reciter-select">اختر القارئ للاستماع:</label>
+                <select id="reciter-select">
+                    <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
+                    <option value="https://server13.mp3quran.net/husr/">محمود خليل الحصري</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- مشغل الصوتيات للموقع -->
+        <div class="audio-player">
+            <audio id="main-audio" controls></audio>
+        </div>
+
+        <!-- مكان عرض الآيات بالحركات والصفحات -->
+        <div id="quran-container" class="quran-text"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
