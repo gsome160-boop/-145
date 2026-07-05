@@ -3,111 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق القرآن الكريم</title>
+    <title>موقع القرآن الكريم</title>
     <style>
-        body { font-family: 'Arial', sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; text-align: center; }
-        .header-box { background: #1a5235; color: #fff; padding: 30px; border-radius: 15px; margin-bottom: 20px; }
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #ddd; }
-        .tab-btn.active { background: #1a5235; color: #fff; }
-        .content { display: none; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .content.active { display: block; }
-        select, input { padding: 10px; margin: 5px; width: 80%; }
-        .quran-text { line-height: 2.2; font-size: 24px; text-align: justify; padding: 20px; }
-        .footer { margin-top: 20px; font-size: 14px; color: #666; }
+        /* الأنيميشن الترحيبي */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #1a5235; color: #fff;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; animation: fadeOut 2s ease-in-out 2s forwards;
+        }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+        body { font-family: 'Arial', sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .tasbeeh-box { background: #fff; padding: 20px; margin-top: 30px; border-radius: 15px; border: 2px solid #1a5235; display: inline-block; width: 80%; max-width: 400px; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background: #1a5235; color: #fff; border: none; border-radius: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header-box">
+    <!-- الأنيميشن الترحيبي -->
+    <div id="intro-overlay">
         <h1>"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</h1>
-        <p>أحمد، البشرى، الأب والابن</p>
+        <p>المبرمج: أبوالقاسم البشرى</p>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('listen')">الاستماع</button>
-        <button class="tab-btn" onclick="showTab('read')">القراءة</button>
-        <button class="tab-btn" onclick="showTab('tasbeeh')">التسبيح</button>
-    </div>
-
-    <!-- الاستماع -->
-    <div id="listen" class="content active">
-        <h3>قسم الاستماع</h3>
-        <input type="text" id="search-listen" placeholder="ابحث عن اسم السورة..." oninput="filterSurahs('search-listen', 'surah-select')">
-        <select id="surah-select" onchange="playSurah()"></select>
-        <select id="reciter-select" onchange="playSurah()">
-            <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
-            <option value="https://server13.mp3quran.net/husr/">الحصري</option>
-        </select>
-        <audio id="audio" controls style="display:block; width:100%; margin-top:10px;"></audio>
-    </div>
-
-    <!-- القراءة -->
-    <div id="read" class="content">
-        <h3>قسم القراءة</h3>
-        <input type="text" id="search-read" placeholder="ابحث عن اسم السورة..." oninput="filterSurahs('search-read', 'surah-read-select')">
-        <select id="surah-read-select" onchange="loadReadSurah()"></select>
-        <div id="quran-container" class="quran-text"></div>
-    </div>
-
-    <!-- التسبيح -->
-    <div id="tasbeeh" class="content">
+    <!-- المحتوى -->
+    <h1>موقع القرآن الكريم</h1>
+    
+    <div class="tasbeeh-box">
+        <h3>قائمة التسبيح</h3>
         <h2 id="counter">0</h2>
-        <button onclick="count()" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background:#1a5235; color:white; border:none; border-radius:5px;">اضغط للتسبيح</button>
-    </div>
-
-    <div class="footer">
-        <p>من تصميم المبرمج: أبوالقاسم</p>
+        <button onclick="count()">اضغط للتسبيح</button>
+        <button onclick="reset()" style="background: #d9534f;">تصفير</button>
     </div>
 
     <script>
-        let allSurahs = [];
-        fetch('https://api.alquran.cloud/v1/surah').then(res => res.json()).then(data => {
-            allSurahs = data.data;
-            populateSelect('surah-select');
-            populateSelect('surah-read-select');
-        });
-
-        function populateSelect(id) {
-            const select = document.getElementById(id);
-            allSurahs.forEach(s => {
-                let opt = document.createElement('option');
-                opt.value = s.number; opt.text = s.name; select.appendChild(opt);
-            });
-        }
-
-        function filterSurahs(inputId, selectId) {
-            const query = document.getElementById(inputId).value;
-            const select = document.getElementById(selectId);
-            select.innerHTML = '';
-            allSurahs.filter(s => s.name.includes(query)).forEach(s => {
-                let opt = document.createElement('option');
-                opt.value = s.number; opt.text = s.name; select.appendChild(opt);
-            });
-        }
-
-        function showTab(id) {
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        function playSurah() {
-            const num = document.getElementById('surah-select').value.padStart(3, '0');
-            const reciter = document.getElementById('reciter-select').value;
-            document.getElementById('audio').src = reciter + num + '.mp3';
-        }
-
-        function loadReadSurah() {
-            const num = document.getElementById('surah-read-select').value;
-            fetch(`https://api.alquran.cloud/v1/surah/${num}/ar.alafasy`).then(res => res.json()).then(data => {
-                document.getElementById('quran-container').innerHTML = data.data.ayahs.map(a => a.text + ' ﴿' + a.numberInSurah + '﴾').join(' ');
-            });
-        }
-
         let c = 0;
         function count() { c++; document.getElementById('counter').innerText = c; }
+        function reset() { c = 0; document.getElementById('counter').innerText = c; }
     </script>
 </body>
 </html>
