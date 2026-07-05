@@ -5,23 +5,6 @@ const quranContainer = document.getElementById('quran-container');
 const searchInput = document.getElementById('search-input');
 const suggestionsList = document.getElementById('suggestions');
 
-// إضافة تنسيق قوي وفوري للقائمة عبر الجافاسكريبت لضمان ظهورها فوق كل شيء
-if (suggestionsList) {
-    suggestionsList.style.position = 'absolute';
-    suggestionsList.style.backgroundColor = '#ffffff';
-    suggestionsList.style.border = '2px solid #222222';
-    suggestionsList.style.borderRadius = '4px';
-    suggestionsList.style.maxHeight = '250px';
-    suggestionsList.style.overflowY = 'auto';
-    suggestionsList.style.zIndex = '99999';
-    suggestionsList.style.width = '100%';
-    suggestionsList.style.padding = '0';
-    suggestionsList.style.margin = '5px 0 0 0';
-    suggestionsList.style.listStyle = 'none';
-    suggestionsList.style.boxShadow = '0px 4px 10px rgba(0,0,0,0.2)';
-    suggestionsList.style.display = 'none';
-}
-
 let allSurahs = []; 
 
 // 1. جلب قائمة السور وتعبئتها في القائمة المنسدلة
@@ -87,7 +70,6 @@ searchInput.addEventListener('input', (e) => {
             suggestionsList.style.display = 'block';
             const li = document.createElement('li');
             li.textContent = `📖 الانتقال إلى الصفحة رقم ${pageNumber}`;
-            styleListItem(li);
             
             li.addEventListener('click', () => {
                 fetch(`https://api.alquran.cloud/v1/page/${pageNumber}/ar.alafasy`)
@@ -119,7 +101,6 @@ searchInput.addEventListener('input', (e) => {
         matches.forEach(surah => {
             const li = document.createElement('li');
             li.textContent = `🕌 سورة ${surah.name} (رقم ${surah.number})`;
-            styleListItem(li);
             
             li.addEventListener('click', () => {
                 surahSelect.value = surah.number;
@@ -133,25 +114,6 @@ searchInput.addEventListener('input', (e) => {
         suggestionsList.style.display = 'none';
     }
 });
-
-// دالة لتنسيق عناصر القائمة الفردية لتسهيل الضغط عليها وتلوينها بالكامل
-function styleListItem(li) {
-    li.style.padding = '12px';
-    li.style.cursor = 'pointer';
-    li.style.borderBottom = '1px solid #eeeeee';
-    li.style.backgroundColor = '#ffffff';
-    li.style.color = '#333333';
-    li.style.textAlign = 'right';
-    li.style.fontSize = '16px';
-    li.style.fontWeight = 'bold';
-    
-    li.addEventListener('mouseenter', () => {
-        li.style.backgroundColor = '#e1f5fe';
-    });
-    li.addEventListener('mouseleave', () => {
-        li.style.backgroundColor = '#ffffff';
-    });
-}
 
 // إغلاق قائمة الاقتراحات عند الضغط في أي مكان خارجها
 document.addEventListener('click', (e) => {
