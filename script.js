@@ -5,7 +5,24 @@ const quranContainer = document.getElementById('quran-container');
 const searchInput = document.getElementById('search-input');
 const suggestionsList = document.getElementById('suggestions');
 
-let allSurahs = []; // لحفظ السور والبحث فيها محلياً
+// إضافة تنسيق قوي وفوري للقائمة عبر الجافاسكريبت لضمان ظهورها فوق كل شيء
+if (suggestionsList) {
+    suggestionsList.style.position = 'absolute';
+    suggestionsList.style.backgroundColor = '#ffffff';
+    suggestionsList.style.border = '2px solid #222222';
+    suggestionsList.style.borderRadius = '4px';
+    suggestionsList.style.maxHeight = '250px';
+    suggestionsList.style.overflowY = 'auto';
+    suggestionsList.style.zIndex = '99999';
+    suggestionsList.style.width = '100%';
+    suggestionsList.style.padding = '0';
+    suggestionsList.style.margin = '5px 0 0 0';
+    suggestionsList.style.listStyle = 'none';
+    suggestionsList.style.boxShadow = '0px 4px 10px rgba(0,0,0,0.2)';
+    suggestionsList.style.display = 'none';
+}
+
+let allSurahs = []; 
 
 // 1. جلب قائمة السور وتعبئتها في القائمة المنسدلة
 fetch('https://api.alquran.cloud/v1/surah')
@@ -36,10 +53,8 @@ function updateAudio() {
     const audioUrl = `${reciterUrl}${formattedSurah}.mp3`;
     
     mainAudio.src = audioUrl;
-    
-    // إجبار المشغل على بدء تشغيل الصوت فوراً بمجرد اختيار السورة
     mainAudio.load();
-    mainAudio.play().catch(err => console.log("بانتظار تشغيل المستخدم يدوياً بسبب سياسة المتصفح"));
+    mainAudio.play().catch(err => console.log("بانتظار تشغيل المستخدم يدوياً"));
 
     fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.alafasy`)
         .then(response => response.json())
@@ -71,7 +86,9 @@ searchInput.addEventListener('input', (e) => {
         if (pageNumber >= 1 && pageNumber <= 604) {
             suggestionsList.style.display = 'block';
             const li = document.createElement('li');
-            li.textContent = `انتقال إلى الصفحة رقم ${pageNumber}`;
+            li.textContent = `📖 الانتقال إلى الصفحة رقم ${pageNumber}`;
+            styleListItem(li);
+            
             li.addEventListener('click', () => {
                 fetch(`https://api.alquran.cloud/v1/page/${pageNumber}/ar.alafasy`)
                     .then(response => response.json())
@@ -79,7 +96,7 @@ searchInput.addEventListener('input', (e) => {
                         if (data.data && data.data.ayahs.length > 0) {
                             const targetSurahNum = data.data.ayahs[0].surah.number;
                             surahSelect.value = targetSurahNum;
-                            updateAudio(); // تشغيل فوري وتحديث النص
+                            updateAudio(); 
                             searchInput.value = `صفحة ${pageNumber}`;
                             suggestionsList.style.display = 'none';
                         }
@@ -101,10 +118,12 @@ searchInput.addEventListener('input', (e) => {
         suggestionsList.style.display = 'block';
         matches.forEach(surah => {
             const li = document.createElement('li');
-            li.textContent = `سورة ${surah.name} (سورة رقم ${surah.number})`;
+            li.textContent = `🕌 سورة ${surah.name} (رقم ${surah.number})`;
+            styleListItem(li);
+            
             li.addEventListener('click', () => {
                 surahSelect.value = surah.number;
-                updateAudio(); // تشغيل فوري وتحديث النص
+                updateAudio(); 
                 searchInput.value = `سورة ${surah.name}`;
                 suggestionsList.style.display = 'none';
             });
@@ -114,6 +133,25 @@ searchInput.addEventListener('input', (e) => {
         suggestionsList.style.display = 'none';
     }
 });
+
+// دالة لتنسيق عناصر القائمة الفردية لتسهيل الضغط عليها وتلوينها بالكامل
+function styleListItem(li) {
+    li.style.padding = '12px';
+    li.style.cursor = 'pointer';
+    li.style.borderBottom = '1px solid #eeeeee';
+    li.style.backgroundColor = '#ffffff';
+    li.style.color = '#333333';
+    li.style.textAlign = 'right';
+    li.style.fontSize = '16px';
+    li.style.fontWeight = 'bold';
+    
+    li.addEventListener('mouseenter', () => {
+        li.style.backgroundColor = '#e1f5fe';
+    });
+    li.addEventListener('mouseleave', () => {
+        li.style.backgroundColor = '#ffffff';
+    });
+}
 
 // إغلاق قائمة الاقتراحات عند الضغط في أي مكان خارجها
 document.addEventListener('click', (e) => {
