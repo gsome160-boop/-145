@@ -5,13 +5,13 @@ const quranContainer = document.getElementById('quran-container');
 const searchInput = document.getElementById('search-input');
 const suggestionsList = document.getElementById('suggestions');
 
-// تنسيق قائمة الاقتراحات لضمان ظهورها بشكل صحيح
+// تنسيق القائمة لضمان ظهورها بشكل صحيح
 if (suggestionsList) {
     suggestionsList.style.position = 'absolute';
     suggestionsList.style.backgroundColor = '#ffffff';
     suggestionsList.style.border = '2px solid #1a5235';
     suggestionsList.style.borderRadius = '4px';
-    suggestionsList.style.maxHeight = '280px';
+    suggestionsList.style.maxHeight = '250px';
     suggestionsList.style.overflowY = 'auto';
     suggestionsList.style.zIndex = '99999';
     suggestionsList.style.width = '100%';
@@ -70,31 +70,29 @@ function updateAudio() {
         .catch(error => console.error('خطأ في جلب نص السورة:', error));
 }
 
-// دالة شاملة وقوية جداً لتنظيف النص من التشكيل والهمزات لتسهيل المطابقة العادية
+// دالة صارمة لتنظيف النص تماماً من أي تشكيل أو رموز أو حركات قرآنية
 function cleanArabicText(text) {
     if (!text) return "";
     return text
-        .replace(/[\u064B-\u065F\u0670]/g, "") // إزالة الحركات بالكامل
+        .replace(/[\u064B-\u065F\u0670]/g, "") // إزالة جميع الحركات (الفتحة، الضمة، الكسرة، السكون، التنوين)
         .replace(/[أإآا]/g, "ا")             // توحيد الألف
-        .replace(/ة/g, "ه")                 // توحيد التاء المربوطة والهاء
-        .replace(/ى/g, "ي")                 // توحيد الياء والألف المقصورة
-        .replace(/سوره\s+/g, "")            // إزالة كلمة سورة إذا كتبت في البحث
+        .replace(/ة/g, "ه")                 // توحيد التاء المربوطة
+        .replace(/ى/g, "ي")                 // توحيد الياء
+        .replace(/سوره\s+/g, "")            // إزالة كلمة سورة إذا كتبها المستخدم
         .replace(/سوره/g, "");
 }
 
-// 3. ميزة الاقتراحات والبحث الذكي (صفحة - سورة - آية نصية)
-let debounceTimer;
+// 3. ميزة الاقتراحات والبحث الذكي المبسط (صفحة أو اسم سورة بدون حركات)
 searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
     suggestionsList.innerHTML = '';
-    clearTimeout(debounceTimer);
     
     if (!query) {
         suggestionsList.style.display = 'none';
         return;
     }
 
-    // أ) إذا كان البحث برقم (صفحة)
+    // أ) إذا كان البحث برقم صفحة
     if (!isNaN(query)) {
         const pageNumber = parseInt(query);
         if (pageNumber >= 1 && pageNumber <= 604) {
@@ -121,16 +119,16 @@ searchInput.addEventListener('input', (e) => {
         return;
     }
 
-    // ب) البحث عن اسم السورة
+    // ب) البحث عن اسم السورة بدون حركات نهائياً
     const cleanQuery = cleanArabicText(query);
-    const surahMatches = allSurahs.filter(surah => {
+    const matches = allSurahs.filter(surah => {
         const cleanSurahName = cleanArabicText(surah.name);
         return cleanSurahName.includes(cleanQuery);
     });
 
-    if (surahMatches.length > 0) {
+    if (matches.length > 0) {
         suggestionsList.style.display = 'block';
-        surahMatches.forEach(surah => {
+        matches.forEach(surah => {
             const li = document.createElement('li');
             li.textContent = `🕌 سورة ${surah.name} (رقم ${surah.number})`;
             styleListItem(li);
@@ -143,35 +141,8 @@ searchInput.addEventListener('input', (e) => {
             });
             suggestionsList.appendChild(li);
         });
-    }
-
-    // ج) البحث داخل الآيات (يعمل عندما يكتب المستخدم 3 حروف فأكثر لتجنب البطء)
-    if (query.length >= 3) {
-        debounceTimer = setTimeout(() => {
-            fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/ar.clean`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.data && data.data.results.length > 0) {
-                        suggestionsList.style.display = 'block';
-                        // عرض أول 5 آيات متطابقة كحد أقصى لمنع ازدحام القائمة
-                        const limitedResults = data.data.results.slice(0, 5);
-                        limitedResults.forEach(result => {
-                            const li = document.createElement('li');
-                            li.textContent = `✨ آية: "${result.text.substring(0, 40)}..." - سورة ${result.surah.name}`;
-                            styleListItem(li);
-                            
-                            li.addEventListener('click', () => {
-                                surahSelect.value = result.surah.number;
-                                updateAudio();
-                                searchInput.value = `سورة ${result.surah.name}`;
-                                suggestionsList.style.display = 'none';
-                            });
-                            suggestionsList.appendChild(li);
-                        });
-                    }
-                })
-                .catch(err => console.log("خطأ أو لا توجد نتائج للآية"));
-        }, 400); // تأخير بسيط لحماية الأداء أثناء الكتابة المتتالية
+    } else {
+        suggestionsList.style.display = 'none';
     }
 });
 
@@ -183,7 +154,7 @@ function styleListItem(li) {
     li.style.backgroundColor = '#ffffff';
     li.style.color = '#222222';
     li.style.textAlign = 'right';
-    li.style.fontSize = '15px';
+    li.style.fontSize = '16px';
     li.style.fontWeight = 'bold';
     
     li.addEventListener('mouseenter', () => {
