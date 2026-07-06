@@ -24,9 +24,9 @@
     <input type="text" id="searchInput" placeholder="ابحث باسم السورة...">
     <select id="surahSelect"></select>
     <select id="reciterSelect">
+        <option value="api:ar.alafasy">مشاري العفاسي (سيرفر ذكي)</option>
+        <option value="api:ar.haithamaldukhin">هيثم الدخين (سيرفر ذكي)</option>
         <option value="https://server7.mp3quran.net/basit/">عبد الباسط عبد الصمد</option>
-        <option value="https://audio.islamweb.net/audio/arabic/recitation/Alafasi/">مشاري العفاسي</option>
-        <option value="https://archive.org/download/haitham-al-dukhin/mp3/">هيثم الدخين</option>
         <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
         <option value="https://server13.mp3quran.net/husr/">الحصري</option>
     </select>
@@ -70,32 +70,75 @@
         updateSelect(filtered);
     });
 
-    select.addEventListener('change', () => {
+    function loadAudio(callback) {
         audioPlayer.pause();
-        audioPlayer.src = reciterSelect.value + select.value + ".mp3";
-        playPauseBtn.innerText = "بدء";
-        display.innerText = "السورة المختارة: " + select.options[select.selectedIndex].text;
+        const reciterValue = reciterSelect.value;
+        const surahValue = select.value;
+        
+        // التحقق إذا كان القارئ يعتمد على نظام الـ API السحابي
+        if (reciterValue.startsWith("api:")) {
+            const identifier = reciterValue.replace("api:", "");
+            const surahNumber = parseInt(surahValue, 10);
+            
+            fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${identifier}`)
+                .then(res => res.json())
+                .then(data => {
+                    // الـ API الخاص بالسور الكاملة يعطي رابط الملف الصوتي للسورة كاملة عبر الآية الأولى
+                    audioPlayer.src = data.data.ayahs[0].audio;
+                    if (callback) callback();
+                })
+                .catch(err => {
+                    console.error("خطأ في جلب السيرفر السحابي:", err);
+                    display.innerText = "خطأ في تحميل السيرفر، جرب مرة أخرى.";
+                });
+        } else {
+            // السيرفرات العادية المباشرة
+            audioPlayer.src = reciterValue + surahValue + ".mp3";
+            if (callback) callback();
+        }
+    }
+
+    select.addEventListener('change', () => {
+        loadAudio(() => {
+            playPauseBtn.innerText = "بدء";
+            display.innerText = "السورة المختارة: " + select.options[select.selectedIndex].text;
+        });
     });
 
     reciterSelect.addEventListener('change', () => {
-        audioPlayer.pause();
-        audioPlayer.src = reciterSelect.value + select.value + ".mp3";
-        playPauseBtn.innerText = "بدء";
+        loadAudio(() => {
+            playPauseBtn.innerText = "بدء";
+        });
     });
 
     function togglePlay() {
         if (!audioPlayer.src || audioPlayer.src === window.location.href) {
-            audioPlayer.src = reciterSelect.value + select.value + ".mp3";
-        }
-        
-        if (audioPlayer.paused) {
-            audioPlayer.play();
-            playPauseBtn.innerText = "توقف";
-            display.innerText = "أنت تستمع إلى: " + select.options[select.selectedIndex].text;
+            loadAudio(() => {
+                startPlayback();
+            });
         } else {
-            audioPlayer.pause();
-            playPauseBtn.innerText = "بدء";
+            if (audioPlayer.paused) {
+                startPlayback();
+            } else {
+                audioPlayer.pause();
+                playPauseBtn.innerText = "بدء";
+            }
         }
+    }
+
+    function startPlayback() {
+        audioPlayer.play()
+            .then(() => {
+                playPauseBtn.innerText = "توقف";
+                display.innerText = "أنت تستمع إلى: " + select.options[select.selectedIndex].text;
+            })
+            .catch(err => {
+                // في حال حدوث انتهاء لجلسة الرابط أو الحماية، يعيد البناء والتشغيل تلقائياً
+                loadAudio(() => {
+                    audioPlayer.play();
+                    playPauseBtn.innerText = "توقف";
+                });
+            });
     }
 
     function increment() { 
