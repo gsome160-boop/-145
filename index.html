@@ -5,21 +5,19 @@
     <title>استمع للقران مجانا</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
-        /* شاشة الترحيب الخضراء */
+        /* شاشة الترحيب */
         #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; animation: fadeOut 2s ease-in-out 2s forwards; }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
         
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
-        select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        #displaySurah { font-size: 1.5em; font-weight: bold; margin-top: 15px; color: #38bdf8; }
-        #surahText { margin-top: 20px; padding: 15px; background: #eee; border-radius: 5px; text-align: right; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        #surahText { margin-top: 20px; padding: 15px; background: #eee; border-radius: 5px; font-size: 1.2em; font-weight: bold; }
         .counter-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 20px; }
         button { padding: 10px 20px; margin: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<!-- شاشة الترحيب -->
 <div id="intro-overlay">
     <h1>"خيركم من تعلم القرآن وعلمه"</h1>
     <p>المبرمج: أبو القاسم البشرى</p>
@@ -27,18 +25,14 @@
 
 <div class="container">
     <h2>قسم الاستماع</h2>
+    <input type="text" id="searchInput" placeholder="ابحث باسم السورة ...">
     <select id="surahSelect"></select>
-    
     <select id="reciterSelect">
         <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
         <option value="https://server13.mp3quran.net/husr/">الحصري</option>
     </select>
-    
     <audio id="audioPlayer" controls style="width: 100%; margin-top: 10px;"></audio>
-    <p id="displaySurah"></p>
-    
-    <!-- هنا ستظهر كتابة السورة -->
-    <div id="surahText">اختر سورة لقراءتها هنا...</div>
+    <div id="surahText">اختر سورة للبدء...</div>
 
     <div class="counter-section">
         <h3>قسم التسبيح</h3>
@@ -49,34 +43,41 @@
 </div>
 
 <script>
-    const surahSelect = document.getElementById('surahSelect');
-    const reciterSelect = document.getElementById('reciterSelect');
-    const audioPlayer = document.getElementById('audioPlayer');
-    const displaySurah = document.getElementById('displaySurah');
-    const surahText = document.getElementById('surahText');
-    let count = 0;
-
     const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
 
-    surahs.forEach((name, index) => {
-        let option = document.createElement("option");
-        option.value = (index + 1).toString().padStart(3, '0');
-        option.text = "سورة " + name;
-        surahSelect.add(option);
+    const surahSelect = document.getElementById('surahSelect');
+    const searchInput = document.getElementById('searchInput');
+    const surahText = document.getElementById('surahText');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const reciterSelect = document.getElementById('reciterSelect');
+
+    function populate(list) {
+        surahSelect.innerHTML = '';
+        list.forEach((name, index) => {
+            let opt = document.createElement("option");
+            opt.value = (index + 1).toString().padStart(3, '0');
+            opt.text = "سورة " + name;
+            surahSelect.add(opt);
+        });
+    }
+
+    populate(surahs);
+
+    searchInput.addEventListener('input', () => {
+        const filtered = surahs.filter(s => s.includes(searchInput.value));
+        populate(filtered);
     });
 
     function playAudio() {
-        const surahName = surahSelect.options[surahSelect.selectedIndex].text;
         audioPlayer.src = reciterSelect.value + surahSelect.value + ".mp3";
-        displaySurah.innerText = surahName;
-        // تحديث نص السورة (هنا يظهر اسم السورة، يمكنك لاحقاً ربط ملفات نصية إذا أردت)
-        surahText.innerText = "جاري عرض نص " + surahName + " (سيتم ربط النص هنا لاحقاً)";
+        surahText.innerText = "أنت تستمع الآن إلى: " + surahSelect.options[surahSelect.selectedIndex].text;
         audioPlayer.play();
     }
 
     surahSelect.addEventListener('change', playAudio);
     reciterSelect.addEventListener('change', playAudio);
 
+    let count = 0;
     function increment() { count++; document.getElementById('count').innerText = count; }
     function reset() { count = 0; document.getElementById('count').innerText = count; }
 </script>
