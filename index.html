@@ -2,90 +2,72 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق القرآن الكريم</title>
+    <title>موقع القرآن الكريم</title>
     <style>
-        /* الأنيميشن الترحيبي */
-        #intro-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #1a5235; color: #fff;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; animation: fadeOut 2s ease-in-out 2s forwards;
-        }
-        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
-
-        body { font-family: 'Arial', sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .box { background: #fff; padding: 20px; margin: 10px auto; border-radius: 15px; border: 2px solid #1a5235; width: 90%; max-width: 500px; }
-        select, input { padding: 10px; margin: 5px; width: 90%; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; cursor: pointer; background: #1a5235; color: #fff; border: none; border-radius: 5px; margin: 5px; }
+        body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
+        select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        #displaySurah { font-size: 1.5em; font-weight: bold; margin-top: 15px; color: #38bdf8; }
+        .counter-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 20px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="intro-overlay">
-        <h1>"خَيرُكُم مَن تَعَلَّمَ القُرآنَ وَعَلَّمَه"</h1>
-        <p>المبرمج: أبوالقاسم البشرى</p>
-    </div>
+<div class="container">
+    <h2>قسم الاستماع</h2>
+    <select id="surahSelect"></select>
+    <audio id="audioPlayer" controls style="width: 100%;"></audio>
+    <p id="displaySurah"></p>
 
-    <h1>موقع القرآن الكريم</h1>
-
-    <div class="box">
-        <h3>قسم الاستماع</h3>
-        <input type="text" id="search" placeholder="ابحث باسم السورة (بدون حركات)..." oninput="filterSurahs()">
-        <select id="surah-select" onchange="playSurah()"></select>
-        <select id="reciter-select" onchange="playSurah()">
-            <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
-            <option value="https://server13.mp3quran.net/husr/">الحصري</option>
-        </select>
-        <audio id="audio" controls style="display:block; width:100%; margin-top:10px;"></audio>
-    </div>
-
-    <div class="box">
+    <div class="counter-section">
         <h3>قسم التسبيح</h3>
-        <h2 id="counter">0</h2>
-        <button onclick="count()">اضغط للتسبيح</button>
-        <button onclick="reset()" style="background: #d9534f;">تصفير</button>
+        <h1 id="count">0</h1>
+        <button onclick="increment()">اضغط للتسبيح</button>
+        <button onclick="reset()">تصفير</button>
     </div>
+</div>
 
-    <script>
-        let allSurahs = [];
+<script>
+    const surahs = [
+        "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس",
+        "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه",
+        "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
+        "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر",
+        "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق",
+        "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة",
+        "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج",
+        "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس",
+        "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
+        "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات",
+        "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر",
+        "المسد", "الإخلاص", "الفلق", "الناس"
+    ];
 
-        // دالة تنظيف النص من الحركات
-        function cleanText(text) {
-            return text.replace(/[\u064B-\u065F\u0670]/g, "")
-                       .replace(/[أإآ]/g, "ا")
-                       .replace(/ة/g, "ه");
-        }
+    const surahSelect = document.getElementById('surahSelect');
+    const displaySurah = document.getElementById('displaySurah');
+    let count = 0;
 
-        fetch('https://api.alquran.cloud/v1/surah').then(res => res.json()).then(data => {
-            allSurahs = data.data;
-            populateSelect(allSurahs);
-        });
+    surahs.forEach((name) => {
+        let option = document.createElement("option");
+        option.text = "سورة " + name;
+        surahSelect.add(option);
+    });
 
-        function populateSelect(list) {
-            const select = document.getElementById('surah-select');
-            select.innerHTML = '';
-            list.forEach(s => {
-                let opt = document.createElement('option');
-                opt.value = s.number; opt.text = s.name; select.appendChild(opt);
-            });
-        }
+    surahSelect.addEventListener('change', function() {
+        displaySurah.innerText = surahSelect.options[surahSelect.selectedIndex].text;
+    });
 
-        function filterSurahs() {
-            const query = cleanText(document.getElementById('search').value);
-            const filtered = allSurahs.filter(s => cleanText(s.name).includes(query));
-            populateSelect(filtered);
-        }
+    displaySurah.innerText = surahSelect.options[0].text;
 
-        function playSurah() {
-            const num = document.getElementById('surah-select').value.padStart(3, '0');
-            const reciter = document.getElementById('reciter-select').value;
-            document.getElementById('audio').src = reciter + num + '.mp3';
-        }
-
-        let c = 0;
-        function count() { c++; document.getElementById('counter').innerText = c; }
-        function reset() { c = 0; document.getElementById('counter').innerText = c; }
-    </script>
+    function increment() {
+        count++;
+        document.getElementById('count').innerText = count;
+    }
+    function reset() {
+        count = 0;
+        document.getElementById('count').innerText = count;
+    }
+</script>
 </body>
 </html>
