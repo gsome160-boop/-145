@@ -7,16 +7,15 @@
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
         #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
-        select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+        select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; }
         #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border-radius: 5px; min-height: 100px; }
-        button { padding: 10px 20px; cursor: pointer; background: #1a5235; color: white; border: none; }
     </style>
 </head>
 <body>
 
 <div id="intro-overlay" onclick="this.style.display='none'">
     <h1>"خيركم من تعلم القرآن وعلمه"</h1>
-    <p>المبرمج: أبو القاسم البشري (اضغط للدخول)</p>
+    <p>المبرمج: أبو القاسم (اضغط للدخول)</p>
 </div>
 
 <div class="container">
@@ -24,6 +23,7 @@
     <select id="surahSelect"></select>
     <button id="playPauseBtn" onclick="togglePlay()">بدء</button>
     <div id="surahTextDisplay">اختر سورة للبدء</div>
+    
     <hr>
     <h3>قسم التسبيح</h3>
     <h1 id="count">0</h1>
@@ -52,11 +52,11 @@
         select.add(opt);
     });
 
-    // تشغيل مباشر عند الاختيار
+    // تشغيل الصوت عند الاختيار
     select.addEventListener('change', () => {
         let s = surahData.find(item => item.id === select.value);
         audioPlayer.src = `https://server11.mp3quran.net/yasser/${select.value}.mp3`;
-        display.innerText = s.text;
+        display.innerText = s ? s.text : "النص غير متوفر";
         audioPlayer.play();
         playPauseBtn.innerText = "توقف";
     });
