@@ -24,11 +24,11 @@
     <input type="text" id="searchInput" placeholder="ابحث باسم السورة...">
     <select id="surahSelect"></select>
     <select id="reciterSelect">
-        <option value="format3:https://download.quranicaudio.com/quran/mishari_rashid_alafasy/">مشاري العفاسي</option>
-        <option value="format3:https://download.quranicaudio.com/quran/abdul_basit_samad/murattal/">عبد الباسط عبد الصمد</option>
-        <option value="format1:https://archive.org/download/haitham-al-dukhin/mp3/">هيثم الدخين</option>
-        <option value="format3:https://download.quranicaudio.com/quran/yasser_ad-dussary/">ياسر الدوسري</option>
-        <option value="format3:https://download.quranicaudio.com/quran/mahmoud_khali_al-husary/">الحصري</option>
+        <option value="https://quran.com.kw/clips/afasy-high/">مشاري العفاسي</option>
+        <option value="https://static.islamway.net/quran/maratib/001/">عبد الباسط عبد الصمد</option>
+        <option value="https://buraq.tvquran.com/download/haitham_al_dukhin/murattal/">هيثم الدخين</option>
+        <option value="https://quran.com.kw/clips/yaser-aldosari/">ياسر الدوسري</option>
+        <option value="https://quran.com.kw/clips/al-hosari/">الحصري</option>
     </select>
     <button id="playPauseBtn" onclick="togglePlay()">بدء</button>
     <div id="surahTextDisplay">اختر سورة للبدء</div>
@@ -57,7 +57,7 @@
         list.forEach((name) => {
             let opt = document.createElement("option");
             let realIndex = surahList.indexOf(name) + 1;
-            opt.value = realIndex.toString(); // القيمة الأساسية هي الرقم العادي بدون أصفار
+            opt.value = realIndex.toString().padStart(3, '0'); // كل السيرفرات الحالية مهيأة لثلاثة أرقام 001
             opt.text = name;
             select.add(opt);
         });
@@ -72,19 +72,9 @@
 
     function setAudioSource() {
         audioPlayer.pause();
-        let rawValue = reciterSelect.value;
-        let surahNum = select.value;
-        
-        if (rawValue.startsWith("format3:")) {
-            // يحتاج 3 أرقام (مثال: 001.mp3) لـ العفاسي، عبد الباسط، الدوسري، والحصري
-            let baseUrl = rawValue.replace("format3:", "");
-            let formattedIndex = surahNum.padStart(3, '0');
-            audioPlayer.src = baseUrl + formattedIndex + ".mp3";
-        } else if (rawValue.startsWith("format1:")) {
-            // يحتاج رقم عادي بدون أصفار (مثال: 1.mp3) لـ هيثم الدخين
-            let baseUrl = rawValue.replace("format1:", "");
-            audioPlayer.src = baseUrl + surahNum + ".mp3";
-        }
+        let baseUrl = reciterSelect.value;
+        let surahValue = select.value;
+        audioPlayer.src = baseUrl + surahValue + ".mp3";
     }
 
     select.addEventListener('change', () => {
@@ -111,7 +101,7 @@
                 })
                 .catch(err => {
                     console.error("Playback error:", err);
-                    display.innerText = "حدث خطأ أثناء التشغيل، يرجى المحاولة مرة أخرى.";
+                    display.innerText = "خطأ في السيرفر أو جاري التحميل.. جرب تشغيل سورة أخرى.";
                 });
         } else {
             audioPlayer.pause();
