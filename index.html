@@ -2,39 +2,47 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>استمع للقران الكريم</title>
+    <title>موقع القرآن الكريم</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
-        /* شاشة الترحيب */
-        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; animation: fadeOut 2s ease-in-out 2s forwards; }
-        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        
+        /* حركة الانتقال للشاشة الخضراء */
+        #intro-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: #1a5235; color: #fff; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 9999; 
+            transition: opacity 1s ease, visibility 1s; 
+        }
         
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
         input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        #surahText { margin-top: 20px; padding: 15px; background: #eee; border-radius: 5px; font-size: 1.1em; }
-        .counter-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 20px; }
-        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border: 1px solid #b2ebf2; border-radius: 5px; min-height: 100px; }
+        .controls { margin: 20px 0; }
+        button { padding: 10px 20px; cursor: pointer; background: #1a5235; color: white; border: none; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div id="intro-overlay">
+<!-- شاشة الترحيب الخضراء -->
+<div id="intro-overlay" onclick="this.style.opacity='0'; this.style.visibility='hidden';">
     <h1>"خيركم من تعلم القرآن وعلمه"</h1>
-    <p>المبرمج: أبو القاسم البشرى</p>
+    <p>المبرمج: أبو القاسم البشري</p>
+    <p><small>(اضغط هنا للانتقال)</small></p>
 </div>
 
 <div class="container">
     <h2>قسم الاستماع</h2>
     <input type="text" id="searchInput" placeholder="ابحث باسم السورة...">
     <select id="surahSelect"></select>
-    <select id="reciterSelect">
-        <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
-        <option value="https://server13.mp3quran.net/husr/">الحصري</option>
-    </select>
-    <audio id="audioPlayer" controls style="width: 100%; margin-top: 10px;"></audio>
-    <div id="surahText">اختر سورة للبدء...</div>
+    
+    <div class="controls">
+        <button id="playPauseBtn" onclick="togglePlay()">بدء</button>
+    </div>
+    
+    <div id="surahTextDisplay">اختر سورة لقراءتها هنا...</div>
 
-    <div class="counter-section">
+    <div style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 20px;">
         <h3>قسم التسبيح</h3>
         <h1 id="count">0</h1>
         <button onclick="increment()">اضغط للتسبيح</button>
@@ -42,68 +50,43 @@
     </div>
 </div>
 
+<audio id="audioPlayer"></audio>
+
 <script>
-    // قائمة السور مع أرقامها الثابتة
-    const surahs = [
-        {name: "الفاتحة", id: "001"}, {name: "البقرة", id: "002"}, {name: "آل عمران", id: "003"}, {name: "النساء", id: "004"},
-        {name: "المائدة", id: "005"}, {name: "الأنعام", id: "006"}, {name: "الأعراف", id: "007"}, {name: "الأنفال", id: "008"},
-        {name: "التوبة", id: "009"}, {name: "يونس", id: "010"}, {name: "هود", id: "011"}, {name: "يوسف", id: "012"},
-        {name: "الرعد", id: "013"}, {name: "إبراهيم", id: "014"}, {name: "الحجر", id: "015"}, {name: "النحل", id: "016"},
-        {name: "الإسراء", id: "017"}, {name: "الكهف", id: "018"}, {name: "مريم", id: "019"}, {name: "طه", id: "020"},
-        {name: "الأنبياء", id: "021"}, {name: "الحج", id: "022"}, {name: "المؤمنون", id: "023"}, {name: "النور", id: "024"},
-        {name: "الفرقان", id: "025"}, {name: "الشعراء", id: "026"}, {name: "النمل", id: "027"}, {name: "القصص", id: "028"},
-        {name: "العنكبوت", id: "029"}, {name: "الروم", id: "030"}, {name: "لقمان", id: "031"}, {name: "السجدة", id: "032"},
-        {name: "الأحزاب", id: "033"}, {name: "سبأ", id: "034"}, {name: "فاطر", id: "035"}, {name: "يس", id: "036"},
-        {name: "الصافات", id: "037"}, {name: "ص", id: "038"}, {name: "الزمر", id: "039"}, {name: "غافر", id: "040"},
-        {name: "فصلت", id: "041"}, {name: "الشورى", id: "042"}, {name: "الزخرف", id: "043"}, {name: "الدخان", id: "044"},
-        {name: "الجاثية", id: "045"}, {name: "الأحقاف", id: "046"}, {name: "محمد", id: "047"}, {name: "الفتح", id: "048"},
-        {name: "الحجرات", id: "049"}, {name: "ق", id: "050"}, {name: "الذاريات", id: "051"}, {name: "الطور", id: "052"},
-        {name: "النجم", id: "053"}, {name: "القمر", id: "054"}, {name: "الرحمن", id: "055"}, {name: "الواقعة", id: "056"},
-        {name: "الحديد", id: "057"}, {name: "المجادلة", id: "058"}, {name: "الحشر", id: "059"}, {name: "الممتحنة", id: "060"},
-        {name: "الصف", id: "061"}, {name: "الجمعة", id: "062"}, {name: "المنافقون", id: "063"}, {name: "التغابن", id: "064"},
-        {name: "الطلاق", id: "065"}, {name: "التحريم", id: "066"}, {name: "الملك", id: "067"}, {name: "القلم", id: "068"},
-        {name: "الحاقة", id: "069"}, {name: "المعارج", id: "070"}, {name: "نوح", id: "071"}, {name: "الجن", id: "072"},
-        {name: "المزمل", id: "073"}, {name: "المدثر", id: "074"}, {name: "القيامة", id: "075"}, {name: "الإنسان", id: "076"},
-        {name: "المرسلات", id: "077"}, {name: "النبأ", id: "078"}, {name: "النازعات", id: "079"}, {name: "عبس", id: "080"},
-        {name: "التكوير", id: "081"}, {name: "الإنفطار", id: "082"}, {name: "المطففين", id: "083"}, {name: "الإنشقاق", id: "084"},
-        {name: "البروج", id: "085"}, {name: "الطارق", id: "086"}, {name: "الأعلى", id: "087"}, {name: "الغاشية", id: "088"},
-        {name: "الفجر", id: "089"}, {name: "البلد", id: "090"}, {name: "الشمس", id: "091"}, {name: "الليل", id: "092"},
-        {name: "الضحى", id: "093"}, {name: "الشرح", id: "094"}, {name: "التين", id: "095"}, {name: "العلق", id: "096"},
-        {name: "القدر", id: "097"}, {name: "البينة", id: "098"}, {name: "الزلزلة", id: "099"}, {name: "العاديات", id: "100"},
-        {name: "القارعة", id: "101"}, {name: "التكاثر", id: "102"}, {name: "العصر", id: "103"}, {name: "الهمزة", id: "104"},
-        {name: "الفيل", id: "105"}, {name: "قريش", id: "106"}, {name: "الماعون", id: "107"}, {name: "الكوثر", id: "108"},
-        {name: "الكافرون", id: "109"}, {name: "النصر", id: "110"}, {name: "المسد", id: "111"}, {name: "الإخلاص", id: "112"},
-        {name: "الفلق", id: "113"}, {name: "الناس", id: "114"}
+    const surahData = [
+        {name: "الفاتحة", id: "001", text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2)..."},
+        {name: "البقرة", id: "002", text: "الم (1) ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِلْمُتَّقِينَ (2)..."}
     ];
 
-    const surahSelect = document.getElementById('surahSelect');
-    const searchInput = document.getElementById('searchInput');
     const audioPlayer = document.getElementById('audioPlayer');
-    const reciterSelect = document.getElementById('reciterSelect');
-    const surahText = document.getElementById('surahText');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const surahSelect = document.getElementById('surahSelect');
+    const surahTextDisplay = document.getElementById('surahTextDisplay');
 
-    function populate(list) {
-        surahSelect.innerHTML = '';
-        list.forEach((s) => {
-            let opt = document.createElement("option");
-            opt.value = s.id;
-            opt.text = "سورة " + s.name;
-            surahSelect.add(opt);
-        });
-    }
-
-    populate(surahs);
-
-    searchInput.addEventListener('input', () => {
-        const filtered = surahs.filter(s => s.name.includes(searchInput.value));
-        populate(filtered);
+    surahData.forEach(s => {
+        let opt = document.createElement("option");
+        opt.value = s.id;
+        opt.text = s.name;
+        surahSelect.add(opt);
     });
 
     surahSelect.addEventListener('change', () => {
-        audioPlayer.src = reciterSelect.value + surahSelect.value + ".mp3";
-        surahText.innerText = "أنت تستمع إلى: " + surahSelect.options[surahSelect.selectedIndex].text;
+        let selectedSurah = surahData.find(s => s.id === surahSelect.value);
+        audioPlayer.src = `https://server11.mp3quran.net/yasser/${surahSelect.value}.mp3`;
+        surahTextDisplay.innerText = selectedSurah ? selectedSurah.text : "النص غير متوفر";
         audioPlayer.play();
+        playPauseBtn.innerText = "توقف";
     });
+
+    function togglePlay() {
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+            playPauseBtn.innerText = "توقف";
+        } else {
+            audioPlayer.pause();
+            playPauseBtn.innerText = "بدء";
+        }
+    }
 
     let count = 0;
     function increment() { count++; document.getElementById('count').innerText = count; }
