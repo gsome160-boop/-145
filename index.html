@@ -2,10 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>موقع القرآن الكريم</title>
+    <title>استمع للقران الكريم مجانا</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
-        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; }
+        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 1s ease; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
         select, input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
         #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border-radius: 5px; min-height: 100px; }
@@ -13,9 +13,9 @@
 </head>
 <body>
 
-<div id="intro-overlay" onclick="this.style.display='none'">
+<div id="intro-overlay">
     <h1>"خيركم من تعلم القرآن وعلمه"</h1>
-    <p>المبرمج: أبو القاسم (اضغط للدخول)</p>
+    <p>برمجة:ابوالقاسم البشرى</p>
 </div>
 
 <div class="container">
@@ -102,6 +102,15 @@
     function resetCounter() { 
         document.getElementById('count').innerText = 0; 
     }
+
+    // الانتقال التلقائي (بعد 3 ثوانٍ)
+    setTimeout(() => {
+        const overlay = document.getElementById('intro-overlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 1000);
+    }, 3000);
 </script>
 </body>
 </html>
