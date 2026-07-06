@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>موقع القرآن الكريم</title>
+    <title>تغلم القران مجانا</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
@@ -15,9 +15,20 @@
 <body>
 
 <div class="container">
+    <!-- التعديلات التي طلبتها عادت -->
+    <h1>"خيركم من تعلم القرآن وعلمه"</h1>
+    <p>المبرمج: أبو القاسم البشري</p>
+    
     <h2>قسم الاستماع</h2>
     <select id="surahSelect"></select>
-    <audio id="audioPlayer" controls style="width: 100%;"></audio>
+    
+    <!-- مشغل الصوت يعتمد على القارئ والسورة -->
+    <select id="reciterSelect">
+        <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
+        <option value="https://server13.mp3quran.net/husr/">الحصري</option>
+    </select>
+    
+    <audio id="audioPlayer" controls style="width: 100%; margin-top: 10px;"></audio>
     <p id="displaySurah"></p>
 
     <div class="counter-section">
@@ -29,45 +40,33 @@
 </div>
 
 <script>
-    const surahs = [
-        "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس",
-        "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه",
-        "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
-        "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر",
-        "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق",
-        "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة",
-        "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج",
-        "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس",
-        "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
-        "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات",
-        "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر",
-        "المسد", "الإخلاص", "الفلق", "الناس"
-    ];
-
     const surahSelect = document.getElementById('surahSelect');
+    const reciterSelect = document.getElementById('reciterSelect');
+    const audioPlayer = document.getElementById('audioPlayer');
     const displaySurah = document.getElementById('displaySurah');
     let count = 0;
 
-    surahs.forEach((name) => {
+    // قائمة السور
+    const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
+
+    surahs.forEach((name, index) => {
         let option = document.createElement("option");
+        option.value = (index + 1).toString().padStart(3, '0');
         option.text = "سورة " + name;
         surahSelect.add(option);
     });
 
-    surahSelect.addEventListener('change', function() {
+    function playAudio() {
+        audioPlayer.src = reciterSelect.value + surahSelect.value + ".mp3";
         displaySurah.innerText = surahSelect.options[surahSelect.selectedIndex].text;
-    });
-
-    displaySurah.innerText = surahSelect.options[0].text;
-
-    function increment() {
-        count++;
-        document.getElementById('count').innerText = count;
+        audioPlayer.play();
     }
-    function reset() {
-        count = 0;
-        document.getElementById('count').innerText = count;
-    }
+
+    surahSelect.addEventListener('change', playAudio);
+    reciterSelect.addEventListener('change', playAudio);
+
+    function increment() { count++; document.getElementById('count').innerText = count; }
+    function reset() { count = 0; document.getElementById('count').innerText = count; }
 </script>
 </body>
 </html>
