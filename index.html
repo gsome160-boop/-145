@@ -2,27 +2,33 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تغلم القران مجانا</title>
+    <title>استمع للقران مجانا</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
+        /* شاشة الترحيب الخضراء */
+        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; animation: fadeOut 2s ease-in-out 2s forwards; }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
         select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
         #displaySurah { font-size: 1.5em; font-weight: bold; margin-top: 15px; color: #38bdf8; }
+        #surahText { margin-top: 20px; padding: 15px; background: #eee; border-radius: 5px; text-align: right; }
         .counter-section { margin-top: 20px; border-top: 2px solid #333; padding-top: 20px; }
         button { padding: 10px 20px; margin: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- التعديلات التي طلبتها عادت -->
+<!-- شاشة الترحيب -->
+<div id="intro-overlay">
     <h1>"خيركم من تعلم القرآن وعلمه"</h1>
-    <p>المبرمج: أبو القاسم البشري</p>
-    
+    <p>المبرمج: أبو القاسم البشرى</p>
+</div>
+
+<div class="container">
     <h2>قسم الاستماع</h2>
     <select id="surahSelect"></select>
     
-    <!-- مشغل الصوت يعتمد على القارئ والسورة -->
     <select id="reciterSelect">
         <option value="https://server11.mp3quran.net/yasser/">ياسر الدوسري</option>
         <option value="https://server13.mp3quran.net/husr/">الحصري</option>
@@ -30,6 +36,9 @@
     
     <audio id="audioPlayer" controls style="width: 100%; margin-top: 10px;"></audio>
     <p id="displaySurah"></p>
+    
+    <!-- هنا ستظهر كتابة السورة -->
+    <div id="surahText">اختر سورة لقراءتها هنا...</div>
 
     <div class="counter-section">
         <h3>قسم التسبيح</h3>
@@ -44,9 +53,9 @@
     const reciterSelect = document.getElementById('reciterSelect');
     const audioPlayer = document.getElementById('audioPlayer');
     const displaySurah = document.getElementById('displaySurah');
+    const surahText = document.getElementById('surahText');
     let count = 0;
 
-    // قائمة السور
     const surahs = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
 
     surahs.forEach((name, index) => {
@@ -57,8 +66,11 @@
     });
 
     function playAudio() {
+        const surahName = surahSelect.options[surahSelect.selectedIndex].text;
         audioPlayer.src = reciterSelect.value + surahSelect.value + ".mp3";
-        displaySurah.innerText = surahSelect.options[surahSelect.selectedIndex].text;
+        displaySurah.innerText = surahName;
+        // تحديث نص السورة (هنا يظهر اسم السورة، يمكنك لاحقاً ربط ملفات نصية إذا أردت)
+        surahText.innerText = "جاري عرض نص " + surahName + " (سيتم ربط النص هنا لاحقاً)";
         audioPlayer.play();
     }
 
