@@ -5,75 +5,58 @@
     <title>موقع القرآن الكريم</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
-        
-        /* حركة الانتقال للشاشة الخضراء */
-        #intro-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background-color: #1a5235; color: #fff; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 9999; 
-            transition: opacity 1s ease, visibility 1s; 
-        }
-        
+        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border: 1px solid #b2ebf2; border-radius: 5px; min-height: 100px; }
-        .controls { margin: 20px 0; }
-        button { padding: 10px 20px; cursor: pointer; background: #1a5235; color: white; border: none; border-radius: 5px; }
+        select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+        #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border-radius: 5px; min-height: 100px; }
+        button { padding: 10px 20px; cursor: pointer; background: #1a5235; color: white; border: none; }
     </style>
 </head>
 <body>
 
-<!-- شاشة الترحيب الخضراء -->
-<div id="intro-overlay" onclick="this.style.opacity='0'; this.style.visibility='hidden';">
+<div id="intro-overlay" onclick="this.style.display='none'">
     <h1>"خيركم من تعلم القرآن وعلمه"</h1>
-    <p>المبرمج: أبو القاسم البشري</p>
-    <p><small>(اضغط هنا للانتقال)</small></p>
+    <p>المبرمج: أبو القاسم البشري (اضغط للدخول)</p>
 </div>
 
 <div class="container">
     <h2>قسم الاستماع</h2>
-    <input type="text" id="searchInput" placeholder="ابحث باسم السورة...">
     <select id="surahSelect"></select>
-    
-    <div class="controls">
-        <button id="playPauseBtn" onclick="togglePlay()">بدء</button>
-    </div>
-    
-    <div id="surahTextDisplay">اختر سورة لقراءتها هنا...</div>
-
-    <div style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 20px;">
-        <h3>قسم التسبيح</h3>
-        <h1 id="count">0</h1>
-        <button onclick="increment()">اضغط للتسبيح</button>
-        <button onclick="reset()">تصفير</button>
-    </div>
+    <button id="playPauseBtn" onclick="togglePlay()">بدء</button>
+    <div id="surahTextDisplay">اختر سورة للبدء</div>
+    <hr>
+    <h3>قسم التسبيح</h3>
+    <h1 id="count">0</h1>
+    <button onclick="increment()">اضغط للتسبيح</button>
+    <button onclick="reset()">تصفير</button>
 </div>
 
 <audio id="audioPlayer"></audio>
 
 <script>
     const surahData = [
-        {name: "الفاتحة", id: "001", text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ (1) الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ (2)..."},
-        {name: "البقرة", id: "002", text: "الم (1) ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِلْمُتَّقِينَ (2)..."}
+        {name: "الفاتحة", id: "001", text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ..."},
+        {name: "البقرة", id: "002", text: "الم... ذَلِكَ الْكِتَابُ..."}
     ];
 
     const audioPlayer = document.getElementById('audioPlayer');
     const playPauseBtn = document.getElementById('playPauseBtn');
-    const surahSelect = document.getElementById('surahSelect');
-    const surahTextDisplay = document.getElementById('surahTextDisplay');
+    const select = document.getElementById('surahSelect');
+    const display = document.getElementById('surahTextDisplay');
 
+    // تعبئة القائمة
     surahData.forEach(s => {
         let opt = document.createElement("option");
         opt.value = s.id;
         opt.text = s.name;
-        surahSelect.add(opt);
+        select.add(opt);
     });
 
-    surahSelect.addEventListener('change', () => {
-        let selectedSurah = surahData.find(s => s.id === surahSelect.value);
-        audioPlayer.src = `https://server11.mp3quran.net/yasser/${surahSelect.value}.mp3`;
-        surahTextDisplay.innerText = selectedSurah ? selectedSurah.text : "النص غير متوفر";
+    // تشغيل مباشر عند الاختيار
+    select.addEventListener('change', () => {
+        let s = surahData.find(item => item.id === select.value);
+        audioPlayer.src = `https://server11.mp3quran.net/yasser/${select.value}.mp3`;
+        display.innerText = s.text;
         audioPlayer.play();
         playPauseBtn.innerText = "توقف";
     });
