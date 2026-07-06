@@ -7,7 +7,7 @@
         body { font-family: sans-serif; padding: 20px; background-color: #f9f9f9; text-align: center; }
         #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #1a5235; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
-        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        select, input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
         #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border-radius: 5px; min-height: 100px; }
     </style>
 </head>
@@ -45,32 +45,40 @@
     const playPauseBtn = document.getElementById('playPauseBtn');
     const select = document.getElementById('surahSelect');
     const reciterSelect = document.getElementById('reciterSelect');
-    const display = document.getElementById('surahTextDisplay');
     const searchInput = document.getElementById('searchInput');
+    const display = document.getElementById('surahTextDisplay');
 
-    function populateSelect(list) {
+    function updateSelect(list) {
         select.innerHTML = '';
-        list.forEach((name, index) => {
+        list.forEach((name) => {
             let opt = document.createElement("option");
-            opt.value = (index + 1).toString().padStart(3, '0');
+            opt.value = (surahList.indexOf(name) + 1).toString().padStart(3, '0');
             opt.text = name;
             select.add(opt);
         });
     }
 
-    populateSelect(surahList);
+    updateSelect(surahList);
 
     searchInput.addEventListener('input', () => {
         const filtered = surahList.filter(s => s.includes(searchInput.value));
-        populateSelect(filtered);
+        updateSelect(filtered);
+    });
+
+    // عند تغيير السورة أو القارئ، نوقف الصوت ونجهز السورة الجديدة
+    [select, reciterSelect].forEach(el => {
+        el.addEventListener('change', () => {
+            audioPlayer.pause();
+            audioPlayer.src = reciterSelect.value + select.value + ".mp3";
+            playPauseBtn.innerText = "بدء";
+            display.innerText = "السورة المختارة: " + select.options[select.selectedIndex].text;
+        });
     });
 
     function togglePlay() {
         if (audioPlayer.paused) {
-            audioPlayer.src = reciterSelect.value + select.value + ".mp3";
             audioPlayer.play();
             playPauseBtn.innerText = "توقف";
-            display.innerText = "أنت تستمع إلى: " + select.options[select.selectedIndex].text;
         } else {
             audioPlayer.pause();
             playPauseBtn.innerText = "بدء";
