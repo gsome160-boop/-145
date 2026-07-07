@@ -10,6 +10,8 @@
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; border: 2px solid #333; }
         select, input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
         #surahTextDisplay { margin-top: 20px; padding: 15px; background: #e0f7fa; border-radius: 5px; min-height: 100px; }
+        .contact-btn { display: block; background-color: #1a5235; color: white; padding: 12px; margin-top: 20px; border-radius: 5px; text-decoration: none; font-weight: bold; transition: background-color 0.3s ease; }
+        .contact-btn:hover { background-color: #113622; }
     </style>
 </head>
 <body>
@@ -37,6 +39,9 @@
     <h1 id="count">0</h1>
     <button onclick="increment()">اضغط للتسبيح</button>
     <button onclick="resetCounter()">تصفير</button>
+
+    <hr>
+    <a href="mailto:qurancommunication@gmail.com" class="contact-btn">التواصل مع المبرمج</a>
 </div>
 
 <audio id="audioPlayer"></audio>
