@@ -1,19 +1,21 @@
-const surahSelect = document.getElementById('surah-select');
-const surahReadSelect = document.getElementById('surah-read-select');
-const reciterSelect = document.getElementById('reciter-select');
-const mainAudio = document.getElementById('main-audio');
-const quranContainer = document.getElementById('quran-container');
-const quranReadContainer = document.getElementById('quran-read-container');
-const searchInput = document.getElementById('search-input');
+const surahSelect = document.getElementById('surahSelect');
+const reciterSelect = document.getElementById('reciterSelect');
+const audioPlayer = document.getElementById('audioPlayer');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const searchInput = document.getElementById('searchInput');
+const display = document.getElementById('surahTextDisplay');
 const suggestionsList = document.getElementById('suggestions');
 
-// تنسيق القائمة لضمان ظهورها بشكل صحيح
+// مصفوفة السور للاستخدام المحلي عند الفلترة وسرعة العرض
+const surahList = ["الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس", "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه", "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم", "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر", "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق", "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة", "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج", "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس", "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد", "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات", "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "الماعون", "الكوثر", "الكافرون", "النصر", "المسد", "الإخلاص", "الفلق", "الناس"];
+
+// ضبط تنسيق قائمة الاقتراحات للبحث الذكي تلقائياً
 if (suggestionsList) {
     suggestionsList.style.position = 'absolute';
     suggestionsList.style.backgroundColor = '#ffffff';
     suggestionsList.style.border = '2px solid #1a5235';
     suggestionsList.style.borderRadius = '4px';
-    suggestionsList.style.maxHeight = '250px';
+    suggestionsList.style.maxHeight = '200px';
     suggestionsList.style.overflowY = 'auto';
     suggestionsList.style.zIndex = '99999';
     suggestionsList.style.width = '100%';
@@ -26,119 +28,109 @@ if (suggestionsList) {
 
 let allSurahs = []; 
 
-// دالة التنقل بين القوائم الرئيسية (Tabs)
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
-}
-
-// 1. جلب قائمة السور وتعبئتها في قوائم الاستماع والقراءة
+// جلب بيانات السور الأساسية من الـ API لنظام الاقتراحات
 fetch('https://api.alquran.cloud/v1/surah')
     .then(response => response.json())
     .then(data => {
         allSurahs = data.data;
-        allSurahs.forEach(surah => {
-            // إضافة لقائمة الاستماع
-            const option1 = document.createElement('option');
-            option1.value = surah.number;
-            option1.textContent = `${surah.number}. سورة ${surah.name}`;
-            surahSelect.appendChild(option1);
-
-            // إضافة لقائمة القراءة
-            const option2 = document.createElement('option');
-            option2.value = surah.number;
-            option2.textContent = `سورة ${surah.name}`;
-            surahReadSelect.appendChild(option2);
-        });
     })
     .catch(error => console.error('خطأ في جلب السور:', error));
 
-// 2. دالة تحديث وتشغيل الصوت (قائمة الاستماع)
-function updateAudio() {
-    const surahNumber = surahSelect.value;
-    const reciterUrl = reciterSelect.value;
-
-    if (!surahNumber) {
-        mainAudio.src = '';
-        quranContainer.innerHTML = '';
-        return;
-    }
-
-    const formattedSurah = String(surahNumber).padStart(3, '0');
-    const audioUrl = `${reciterUrl}${formattedSurah}.mp3`;
-    
-    mainAudio.src = audioUrl;
-    mainAudio.load();
-    mainAudio.play().catch(err => console.log("بانتظار تشغيل المستخدم يدوياً"));
-
-    fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.alafasy`)
-        .then(response => response.json())
-        .then(data => {
-            quranContainer.innerHTML = '';
-            data.data.ayahs.forEach(ayah => {
-                const ayahSpan = document.createElement('span');
-                ayahSpan.textContent = ayah.text + ` ﴿${ayah.numberInSurah}﴾ `;
-                quranContainer.appendChild(ayahSpan);
-            });
-        });
+function updateSelect(list) {
+    surahSelect.innerHTML = '';
+    list.forEach((name) => {
+        let opt = document.createElement("option");
+        let realIndex = surahList.indexOf(name) + 1;
+        opt.value = realIndex.toString().padStart(3, '0');
+        opt.text = name;
+        surahSelect.add(opt);
+    });
 }
 
-// 3. دالة جلب وعرض نص السورة الكامل للقراءة (قائمة القراءة)
-surahReadSelect.addEventListener('change', () => {
-    const surahNumber = surahReadSelect.value;
-    if (!surahNumber) {
-        quranReadContainer.innerHTML = 'الرجاء اختيار سورة لبدء القراءة...';
-        return;
-    }
-    quranReadContainer.innerHTML = 'جاري تحميل السورة...';
-    
+updateSelect(surahList);
+
+// الدالة الأساسية لجلب وعرض نص الآيات الكاملة بالرسم العثماني داخل الصندوق
+function fetchAndDisplaySurahText(surahIndex) {
+    const surahNumber = parseInt(surahIndex);
+    if (!surahNumber) return;
+
+    display.innerText = "جاري تحميل نص السورة والآيات...";
+
     fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/quran-uthmani`)
         .then(response => response.json())
         .then(data => {
-            quranReadContainer.innerHTML = '';
+            display.innerHTML = '';
             
-            // إضافة البسملة في بداية السورة إذا لم تكن الفاتحة أو التوبة
-            if (surahNumber != 1 && surahNumber != 9) {
+            // وضع البسملة في البداية منفصلة ما عدا الفاتحة والتوبة
+            if (surahNumber !== 1 && surahNumber !== 9) {
                 const bismillahDiv = document.createElement('div');
                 bismillahDiv.style.textAlign = 'center';
-                bismillahDiv.style.marginBottom = '20px';
                 bismillahDiv.style.fontWeight = 'bold';
-                bismillahDiv.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-                quranReadContainer.appendChild(bismillahDiv);
+                bismillahDiv.style.marginBottom = '10px';
+                bismillahDiv.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+                display.appendChild(bismillahDiv);
             }
 
             data.data.ayahs.forEach(ayah => {
                 let text = ayah.text;
-                // إزالة البسملة الملتصقة بأول آية من الـ API لتنسيق أفضل
-                if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah == 1) {
-                    text = text.replace('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', '');
+                // إزالة البسملة الملتصقة بنص الآية الأولى لجمال التنسيق
+                if (surahNumber !== 1 && surahNumber !== 9 && ayah.numberInSurah === 1) {
+                    text = text.replace('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', '');
                 }
                 const ayahSpan = document.createElement('span');
                 ayahSpan.textContent = text + ` ﴿${ayah.numberInSurah}﴾ `;
-                quranReadContainer.appendChild(ayahSpan);
+                display.appendChild(ayahSpan);
             });
         })
-        .catch(() => { quranReadContainer.innerHTML = 'حدث خطأ أثناء تحميل السورة.'; });
+        .catch(() => { display.innerText = 'حدث خطأ أثناء تحميل نص السورة.'; });
+}
+
+function setAudioSource() {
+    audioPlayer.pause();
+    audioPlayer.src = reciterSelect.value + surahSelect.value + ".mp3";
+    // جلب نص الآيات للسورة المحددة وعرضها فوراً
+    fetchAndDisplaySurahText(surahSelect.value);
+}
+
+surahSelect.addEventListener('change', () => {
+    setAudioSource();
+    playPauseBtn.innerText = "بدء";
 });
 
-// 4. نظام التسبيح (عداد الأذكار)
-let count = 0;
-function changeZikr() {
-    document.getElementById('zikr-text').textContent = document.getElementById('zikr-select').value;
-}
-function incrementCounter() {
-    count++;
-    document.getElementById('counter-val').textContent = count;
-}
-function resetCounter() {
-    count = 0;
-    document.getElementById('counter-val').textContent = count;
+reciterSelect.addEventListener('change', () => {
+    setAudioSource();
+    playPauseBtn.innerText = "بدء";
+});
+
+function togglePlay() {
+    if (!audioPlayer.src || audioPlayer.src === window.location.href) {
+        setAudioSource();
+    }
+    
+    if (audioPlayer.paused) {
+        audioPlayer.play()
+            .then(() => {
+                playPauseBtn.innerText = "توقف";
+            })
+            .catch(err => {
+                console.error("Playback error:", err);
+            });
+    } else {
+        audioPlayer.pause();
+        playPauseBtn.innerText = "بدء";
+    }
 }
 
-// 5. دالة تنظيف النص من الحركات والتشكيل للبحث العادي
+// كود عداد التسبيح
+function increment() { 
+    let c = document.getElementById('count'); 
+    c.innerText = parseInt(c.innerText) + 1; 
+}
+function resetCounter() { 
+    document.getElementById('count').innerText = 0; 
+}
+
+// دالة لتنظيف النص وتبسيط عمليات البحث بدون تشكيل وحركات
 function cleanArabicText(text) {
     if (!text) return "";
     return text
@@ -150,16 +142,18 @@ function cleanArabicText(text) {
         .replace(/سوره/g, "");
 }
 
-// 6. ميزة الاقتراحات والبحث الذكي المبسط بدون حركات
+// محرك البحث الذكي المطور (يدعم السور والصفحات)
 searchInput.addEventListener('input', (e) => {
     const query = e.target.value.trim();
     suggestionsList.innerHTML = '';
     
     if (!query) {
         suggestionsList.style.display = 'none';
+        updateSelect(surahList);
         return;
     }
 
+    // إذا كان البحث برقم الصفحة
     if (!isNaN(query)) {
         const pageNumber = parseInt(query);
         if (pageNumber >= 1 && pageNumber <= 604) {
@@ -172,8 +166,9 @@ searchInput.addEventListener('input', (e) => {
                     .then(response => response.json())
                     .then(data => {
                         if (data.data && data.data.ayahs.length > 0) {
-                            surahSelect.value = data.data.ayahs[0].surah.number;
-                            updateAudio(); 
+                            const targetNum = data.data.ayahs[0].surah.number;
+                            surahSelect.value = targetNum.toString().padStart(3, '0');
+                            setAudioSource();
                             searchInput.value = `صفحة ${pageNumber}`;
                             suggestionsList.style.display = 'none';
                         }
@@ -183,6 +178,9 @@ searchInput.addEventListener('input', (e) => {
         }
         return;
     }
+
+    const filtered = surahList.filter(s => cleanArabicText(s).includes(cleanArabicText(query)));
+    updateSelect(filtered);
 
     const cleanQuery = cleanArabicText(query);
     const matches = allSurahs.filter(surah => cleanArabicText(surah.name).includes(cleanQuery));
@@ -194,8 +192,8 @@ searchInput.addEventListener('input', (e) => {
             li.textContent = ` 🕌 سورة ${surah.name} (رقم ${surah.number})`;
             styleListItem(li);
             li.addEventListener('click', () => {
-                surahSelect.value = surah.number;
-                updateAudio(); 
+                surahSelect.value = surah.number.toString().padStart(3, '0');
+                setAudioSource();
                 searchInput.value = `سورة ${surah.name}`;
                 suggestionsList.style.display = 'none';
             });
@@ -207,18 +205,23 @@ searchInput.addEventListener('input', (e) => {
 });
 
 function styleListItem(li) {
-    li.style.padding = '12px';
+    li.style.padding = '10px';
     li.style.cursor = 'pointer';
     li.style.borderBottom = '1px solid #eeeeee';
     li.style.backgroundColor = '#ffffff';
     li.style.color = '#222222';
     li.style.textAlign = 'right';
-    li.style.fontSize = '16px';
-    li.style.fontWeight = 'bold';
-    li.addEventListener('mouseenter', () => { li.style.backgroundColor = '#d4edda'; li.style.color = '#1a5235'; });
-    li.addEventListener('mouseleave', () => { li.style.backgroundColor = '#ffffff'; li.style.color = '#222222'; });
+    li.addEventListener('mouseenter', () => { li.style.backgroundColor = '#e0f7fa'; });
+    li.addEventListener('mouseleave', () => { li.style.backgroundColor = '#ffffff'; });
 }
 
 document.addEventListener('click', (e) => { if (e.target !== searchInput) suggestionsList.style.display = 'none'; });
-surahSelect.addEventListener('change', updateAudio);
-reciterSelect.addEventListener('change', updateAudio);
+
+// اختفاء شاشة الترحيب بعد 3 ثوانٍ
+setTimeout(() => {
+    const overlay = document.getElementById('intro-overlay');
+    if(overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; }, 1000);
+    }
+}, 3000);
